@@ -71,15 +71,35 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
-  void _switchCamera() {
-    if (_cameras == null || _cameras!.isEmpty) {
-      return;
-    }
-    setState(() {
-      _selectedCameraIndex = (_selectedCameraIndex + 1) % _cameras!.length;
-      _initializeCamera();
-    });
+void _switchCamera() async {
+  if (_cameras == null || _cameras!.isEmpty) {
+    return;
   }
+  
+  // Stop the current camera controller
+  await _cameraController?.dispose();
+
+  // Change camera index
+  setState(() {
+    _selectedCameraIndex = (_selectedCameraIndex + 1) % _cameras!.length;
+  });
+
+  // Reinitialize the camera with the new selected index
+  _cameraController = CameraController(
+    _cameras![_selectedCameraIndex],
+    ResolutionPreset.high,
+  );
+
+  // Ensure the camera gets initialized and updates UI
+  try {
+    await _cameraController!.initialize();
+  } catch (e) {
+    print('Error initializing camera: $e');
+  }
+
+  setState(() {});
+}
+
 
   @override
   Widget build(BuildContext context) {
