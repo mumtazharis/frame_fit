@@ -61,7 +61,7 @@ class HomePage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white, 
                           foregroundColor: Colors.black, 
-                          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20), 
+                          padding: EdgeInsets.symmetric(horizontal: 35, vertical: 20), 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
@@ -76,7 +76,7 @@ class HomePage extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white, 
                           side: BorderSide(color: Colors.white), 
-                          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20), 
+                          padding: EdgeInsets.symmetric(horizontal: 35, vertical: 20), 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),

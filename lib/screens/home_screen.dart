@@ -11,7 +11,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     // Navigasi otomatis ke halaman HomePage setelah 3 detik
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
