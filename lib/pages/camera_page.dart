@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
 import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart'; // Tambahkan package image_picker
 import '../widgets/camera_preview_widget.dart';
 import '../widgets/camera_control_widget.dart';
 import 'preview_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 
 class CameraPage extends StatefulWidget {
   @override
@@ -17,26 +19,23 @@ class _CameraPageState extends State<CameraPage> {
   List<CameraDescription>? _cameras;
   int _selectedCameraIndex = 0;
   String? _imagePath;
+  bool _isFlashOn = false;
+  final ImagePicker _picker = ImagePicker(); // Inisialisasi ImagePicker
 
   @override
-  void initState() {
+   void initState() {
     super.initState();
     _initializeCamera();
   }
 
- Future<void> _initializeCamera() async {
-    // Mendapatkan daftar kamera yang tersedia
+  Future<void> _initializeCamera() async {
     _cameras = await availableCameras();
-    
-    // Mencari kamera depan
     _selectedCameraIndex = _cameras!.indexWhere((camera) => camera.lensDirection == CameraLensDirection.front);
 
-    // Jika tidak ada kamera depan, ambil kamera pertama
     if (_selectedCameraIndex == -1) {
-      _selectedCameraIndex = 0; // Kamera default ke kamera pertama
+      _selectedCameraIndex = 0;
     }
 
-    // Inisialisasi kamera
     _cameraController = CameraController(
       _cameras![_selectedCameraIndex],
       ResolutionPreset.high,
@@ -65,7 +64,7 @@ class _CameraPageState extends State<CameraPage> {
       await _mirrorImage(_imagePath!);
     }
 
-    await _goToPreviewPage(); 
+    await _goToPreviewPage();
   }
 
   Future<void> _mirrorImage(String imagePath) async {
@@ -85,6 +84,7 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _goToPreviewPage() async {
+   
     if (_imagePath != null) {
       if (mounted) {
         showDialog(
@@ -101,8 +101,7 @@ class _CameraPageState extends State<CameraPage> {
         );
       }
 
-      await Future.delayed(Duration(seconds: 1));
-
+      await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
         Navigator.of(context).pop();
         Navigator.push(
@@ -154,34 +153,155 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
+  // Fungsi untuk memilih gambar dari galeri
+  Future<void> _selectPicture() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imagePath = pickedFile.path;
+      });
+      await _goToPreviewPage();
+    }
+  }
+  Future<void> _toggleFlash() async {
+    if (_cameraController != null && _cameraController!.value.isInitialized) {
+      CameraDescription cameraDescription = _cameraController!.description;
+
+      // Check if we are using the back camera (most devices support flash for the back camera)
+      if (cameraDescription.lensDirection == CameraLensDirection.back) {
+        _isFlashOn = !_isFlashOn;
+        if (_isFlashOn) {
+          await _cameraController!.setFlashMode(FlashMode.torch);
+        } else {
+          await _cameraController!.setFlashMode(FlashMode.off);
+        }
+      } else if (cameraDescription.lensDirection == CameraLensDirection.front) {
+        // For front cameras (which might not have a flash), increase screen brightness as a workaround
+        _isFlashOn = !_isFlashOn;
+        if (_isFlashOn) {
+          await _setMaxBrightness();  // Maximize screen brightness
+        } else {
+          await _resetBrightness();   // Restore previous brightness
+        }
+      }
+
+      setState(() {});
+    }
+  }
+
+
+
+  Future<void> _setMaxBrightness() async {
+    try {
+      // Mengatur kecerahan maksimum (1.0)
+      await ScreenBrightness.instance.setApplicationScreenBrightness(1.0);
+    } catch (e) {
+      // Menangani error jika terjadi saat mengatur brightness
+      print("Error setting brightness: $e");
+    }
+  }
+
+  Future<void> _resetBrightness() async {
+    _isFlashOn = false;
+    try {
+      // Ambil nilai system brightness
+      // double brightness = await ScreenBrightness.instance.system;
+
+      // Set application brightness ke nilai system brightness
+      await ScreenBrightness.instance.resetApplicationScreenBrightness();
+
+    } catch (e) {
+      print("Error resetting brightness: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double statusBarHeight = MediaQuery.of(context).padding.top;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Camera Page'),
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            flex: 4,
-            child: _cameraController == null || !_cameraController!.value.isInitialized
-                ? const Center(child: CircularProgressIndicator())
-                : SizedBox.expand(
-                    child: CameraPreviewWidget(cameraController: _cameraController!),
+          Padding(
+            padding: EdgeInsets.only(top: statusBarHeight),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: _cameraController == null || !_cameraController!.value.isInitialized
+                      ? const Center(child: CircularProgressIndicator())
+                      : SizedBox.expand(
+                          child: CameraPreviewWidget(cameraController: _cameraController!),
+                        ),
+                ),
+                Expanded(
+                  flex: 1,
+                    child: CameraControlWidget(
+                    onSwitchCamera: () {
+                      _resetBrightness(); // Reset brightness sebelum switch camera
+                      _switchCamera(); // Panggil fungsi switch camera
+                    },
+                    onTakePicture: () {
+                      _takePicture(); // Panggil fungsi ambil gambar
+                      _resetBrightness();
+                    },
+                    onSelectImage: () {
+                      _resetBrightness(); // Reset brightness sebelum memilih gambar
+                      _selectPicture(); // Panggil fungsi memilih gambar
+                    }, // Tambahkan fungsi _selectPicture
                   ),
-          ),
-          Expanded(
-            flex: 1,
-            child: CameraControlWidget(
-              onSwitchCamera: _switchCamera,
-              onTakePicture: _takePicture,
+                ),
+              ],
             ),
           ),
+          Positioned(
+            top: 50, // Posisi tombol silang dari atas preview
+            left: 16, // Jarak dari sisi kiri
+            child: Container(
+              width: 40, // Lebar yang diinginkan untuk latar belakang
+              height: 40, // Tinggi yang diinginkan untuk latar belakang
+              decoration: BoxDecoration(
+                color: Colors.white, // Ganti dengan warna latar belakang yang diinginkan
+                borderRadius: BorderRadius.circular(15), // Radius sudut untuk tampilan yang lebih halus
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.close, size: 20, color: Colors.black), // Ikon silang
+                onPressed: () {
+                  _resetBrightness();
+                  Navigator.pop(context); // Fungsi untuk kembali
+                },
+                tooltip: 'Tutup',
+              ),
+            ),
+          ),
+          Positioned(
+            top: 50, // Posisi tombol flash dari atas preview (sama dengan tombol silang)
+            right: 16, // Jarak dari sisi kanan
+            child: Container(
+              width: 40, // Lebar yang diinginkan untuk latar belakang
+              height: 40, // Tinggi yang diinginkan untuk latar belakang
+              decoration: BoxDecoration(
+                color: _isFlashOn ? Colors.white : Colors.grey, // Ganti dengan warna latar belakang yang diinginkan
+                borderRadius: BorderRadius.circular(15), // Radius sudut untuk tampilan yang lebih halus
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.lightbulb, // Ganti ikon berdasarkan status flash
+                  size: 20,
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  _toggleFlash(); // Ganti dengan fungsi untuk mengubah status flash
+                },
+                tooltip: 'Flash', // Tooltip untuk tombol
+              ),
+            ),
+          ),
+
         ],
       ),
     );
   }
-
   @override
   void dispose() {
     _cameraController?.dispose();

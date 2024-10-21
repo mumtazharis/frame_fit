@@ -41,6 +41,9 @@ dependencies:
   image: ^4.3.0
   flutter_spinkit: ^5.2.1
   page_transition: ^2.1.0
+  flutter_native_splash: ^2.4.2
+  screen_brightness: ^2.0.0+2
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -60,9 +63,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - images/logo_pt.png
-    - images/background.png
-    - images/logo.png
+    - assets/images/logo_pt.png
+    - assets/images/background.png
+    - assets/images/logo.png
+    - assets/icon/camerabutton.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -93,3 +97,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_native_splash:
+  color: "#ffffff" # Warna background splash screen
+  image: assets/images/logo_pt.png # Gambar logo yang ditampilkan (simpan gambar di folder `assets`)
+  android: true
+  ios: true
+  web: true

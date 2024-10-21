@@ -1,33 +1,45 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-  class CameraControlWidget extends StatelessWidget {
-    final Function onSwitchCamera;
-    final Function onTakePicture;
+class CameraControlWidget extends StatelessWidget {
+  final Function onSwitchCamera;
+  final Function onTakePicture;
+  final Function onSelectImage; // Fungsi untuk memilih gambar
 
-    const CameraControlWidget({
-      Key? key,
-      required this.onSwitchCamera,
-      required this.onTakePicture,
-    }) : super(key: key);
+  const CameraControlWidget({
+    Key? key,
+    required this.onSwitchCamera,
+    required this.onTakePicture,
+    required this.onSelectImage, // Tambahkan parameter fungsi onSelectImage
+  }) : super(key: key);
 
-    @override
-    Widget build(BuildContext context) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.cameraswitch_rounded),
-            onPressed: () => onSwitchCamera(),
-            tooltip: 'Ganti Kamera',
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        IconButton(
+          icon: const Icon(Icons.photo_library_rounded), // Ikon untuk memilih gambar dari galeri
+          onPressed: () => onSelectImage(), // Fungsi untuk memilih gambar dari galeri
+          iconSize: 48, // Ukuran ikon disamakan
+        ),
+     
+        const SizedBox(width: 40), // Jarak antar ikon diperbesar
+            IconButton(
+          icon: Image.asset(
+            'assets/icon/camerabutton.png', // Ganti dengan path gambar yang benar
+            width: 72, // Ukuran gambar disamakan
+            height: 72,
           ),
-          const SizedBox(width: 20),
-          IconButton(
-            icon: const Icon(Icons.camera_alt_rounded),
-            onPressed: () => onTakePicture(),
-            tooltip: 'Ambil Foto',
-            iconSize: 64,
-          ),
-        ],
-      );
-    }
+          onPressed: () => onTakePicture(), // Fungsi untuk memilih gambar dari galeri
+        ),
+        const SizedBox(width: 40), // Jarak antar ikon diperbesar
+        IconButton(
+          icon: const Icon(Icons.cameraswitch_rounded),
+          onPressed: () => onSwitchCamera(),
+          tooltip: 'Ganti Kamera',
+          iconSize: 48, // Ukuran ikon disamakan
+        ),
+      ],
+    );
   }
+}

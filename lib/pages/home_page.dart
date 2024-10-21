@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('images/background.png'), // Sesuaikan dengan path gambar background kamu
+                image: AssetImage('assets/images/background.png'), // Sesuaikan dengan path gambar background kamu
                 fit: BoxFit.cover,
               ),
             ),
@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
                 children: [
                   // Logo
                   Image.asset(
-                    'images/logo.png',
+                    'assets/images/logo.png',
                     height: 125, // Ukuran logo lebih besar
                     width: 125,
                   ),
@@ -101,7 +101,7 @@ class HomePage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                         ),
-                        child: Text('Ke Camera Page', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: Text('Pindai Sekarang', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   )
