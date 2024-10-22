@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'daftar_verifikasi.dart'; 
 
 class DaftarPage extends StatefulWidget {
   @override
@@ -66,7 +67,7 @@ class _DaftarPageState extends State<DaftarPage> {
                           SizedBox(height: 16),
                           // Checkbox untuk persetujuan Terms of use dan Privacy Policy
                           Container(
-                            width: 350,
+                            width: 360,
                             child: Row(
                               children: [
                                 Checkbox(
@@ -76,6 +77,7 @@ class _DaftarPageState extends State<DaftarPage> {
                                       _isChecked = value ?? false;
                                     });
                                   },
+                                  activeColor: Color.fromARGB(255, 33, 72, 243), // Set the active color
                                 ),
                                 Expanded(
                                   child: Text(
@@ -87,12 +89,19 @@ class _DaftarPageState extends State<DaftarPage> {
                             ),
                           ),
                           SizedBox(height: 16),
-                          // Tombol Next
+                          // Tombol Lanjut
                           ElevatedButton(
                             onPressed: (_isChecked && _errorMessage == null && _emailController.text.endsWith('@gmail.com'))
                                 ? () {
                                     // Aksi jika checkbox sudah dicentang dan email valid
-                                    print("Lanjut ke halaman berikutnya");
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DaftarVerifikasi(
+                                          email: _emailController.text, // Mengirim email ke halaman verifikasi
+                                        ),
+                                      ),
+                                    );
                                   }
                                 : null, // Tombol akan disable jika checkbox belum dicentang atau email tidak valid
                             style: ElevatedButton.styleFrom(
@@ -100,7 +109,7 @@ class _DaftarPageState extends State<DaftarPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
-                              padding: EdgeInsets.symmetric(horizontal: 150, vertical: 25),
+                              padding: EdgeInsets.symmetric(horizontal: 150, vertical: 20),
                             ),
                             child: Text(
                               'Lanjut',
