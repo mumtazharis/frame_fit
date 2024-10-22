@@ -6,7 +6,7 @@
     <uses-feature android:name="android.hardware.camera" />
 
     <application
-        android:label="Frame Fit"
+        android:label="FrameFit"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
 		android:roundIcon="@mipmap/ic_launcher_round">
