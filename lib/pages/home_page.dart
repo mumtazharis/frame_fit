@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'Bringing our users\nthe best eyewear,\npersonalized fit, and\ninspiring stories in style.',
+                    'Menghadirkan\nkacamata terbaik,\nsesuai dengan kebutuhan pengguna, dan\n kisah inspiratif dalam gaya.',
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 18, // Ukuran teks deskripsi lebih besar
@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          // Navigasi atau aksi saat Sign Up ditekan
+                            Navigator.pushNamed(context, '/daftar');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white, 
@@ -66,7 +66,7 @@ class HomePage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                         ),
-                        child: Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: Text('Daftar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                       SizedBox(width: 15),
                       OutlinedButton(
@@ -81,7 +81,7 @@ class HomePage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                         ),
-                        child: Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: Text('Masuk', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
