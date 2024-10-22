@@ -43,25 +43,13 @@ dependencies:
   flutter_native_splash: ^2.4.2
   screen_brightness: ^2.0.0+2
   shared_preferences: ^2.3.2
+  icons_launcher: ^3.0.0
+
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: "^0.14.1"
-
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/icon/apk.png"
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^4.0.0
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -75,6 +63,7 @@ flutter:
     - assets/icon/camerabutton.png
     - assets/icon/gmail.png
     - assets/icon/x.png
+    - assets/icon/apk.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -111,3 +100,19 @@ flutter_native_splash:
   android: true
   ios: true
   web: true
+
+  
+icons_launcher:
+  image_path: "assets/icon/launcher.png"
+  platforms:
+    android:
+      enable: true
+      image_path: "assets/icon/launcher.png"
+      # adaptive_background_color: '"#ffffff'
+      adaptive_background_image: "assets/icon/launcher.png"
+      adaptive_foreground_image: "assets/icon/launcher.png"
+      adaptive_round_image: "assets/icon/launcher.png"
+      adaptive_monochrome_image: "assets/icon/launcher.png"
+    ios:
+      enable: true
+      image_path: "assets/icon/launcher.png"
