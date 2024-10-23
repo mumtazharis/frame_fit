@@ -23,6 +23,9 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
   bool _isLoading = false;
   int _resendTimer = 30;
   Timer? _timer;
+  
+  // Variabel untuk mengatur visibilitas kata sandi
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -79,12 +82,15 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                 ),
                 SizedBox(height: 50),
                 // Teks informasi pengiriman kode
-                Text(
-                  "Kami telah mengirimkan kode ke",
-                  style: TextStyle(fontSize: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [Text(
+                    "Kami telah mengirimkan kode ke",
+                    style: TextStyle(fontSize: 16),
+                  ),],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
                       widget.email,
@@ -131,22 +137,25 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                 ),
                 SizedBox(height: 1),
                 _resendTimer > 0
-                    ? Text('Kirim ulang dalam $_resendTimer detik')
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [Text('Kirim ulang dalam $_resendTimer detik')]
+                      )
                     : Row(
-                      mainAxisAlignment: MainAxisAlignment.start, 
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            // Aksi kirim ulang kode jika waktunya habis
-                            setState(() {
-                              _resendTimer = 30;
-                              _startResendTimer();
-                            });
-                          },
-                          child: Text('Kirim Ulang Sekarang'),
-                        ),
-                      ],
-                    ),
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              // Aksi kirim ulang kode jika waktunya habis
+                              setState(() {
+                                _resendTimer = 30;
+                                _startResendTimer();
+                              });
+                            },
+                            child: Text('Kirim Ulang Sekarang'),
+                          ),
+                        ],
+                      ),
                 SizedBox(height: 20),
                 // Input Nama Depan dan Nama Belakang dalam satu baris
                 Row(
@@ -176,20 +185,78 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                 ),
                 SizedBox(height: 16),
                 // Input Password
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  onChanged: (value) => _validateForm(),
-                  decoration: InputDecoration(
-                    labelText: 'Kata Sandi',
-                    border: OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.visibility),
-                      onPressed: () {
-                        // Aksi untuk menampilkan atau menyembunyikan password
-                      },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      onChanged: (value) => _validateForm(),
+                      decoration: InputDecoration(
+                        labelText: 'Kata Sandi',
+                        border: OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
                     ),
-                  ),
+                    SizedBox(height: 8),
+                    // Pesan validasi di bawah kolom password
+                    Row(
+                      children: [
+                        Icon(
+                          _passwordController.text.length >= 8
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color: _passwordController.text.length >= 8
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Minimal 8 karakter',
+                          style: TextStyle(
+                            color: _passwordController.text.length >= 8
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          _passwordController.text.contains(RegExp(r'[A-Z]')) &&
+                                  _passwordController.text.contains(RegExp(r'[a-z]')) &&
+                                  _passwordController.text.contains(RegExp(r'[0-9]'))
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color: _passwordController.text.contains(RegExp(r'[A-Z]')) &&
+                                  _passwordController.text.contains(RegExp(r'[a-z]')) &&
+                                  _passwordController.text.contains(RegExp(r'[0-9]'))
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Terdiri dari huruf besar, huruf kecil, dan satu angka',
+                          style: TextStyle(
+                            color: _passwordController.text.contains(RegExp(r'[A-Z]')) &&
+                                    _passwordController.text.contains(RegExp(r'[a-z]')) &&
+                                    _passwordController.text.contains(RegExp(r'[0-9]'))
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 SizedBox(height: 30),
                 // Tombol Daftar
