@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frame_fit/pages/masuk_akun.dart';
 
 class DaftarBerhasil extends StatelessWidget {
   @override
@@ -30,7 +31,12 @@ class DaftarBerhasil extends StatelessWidget {
             // Tombol Lanjutkan
             ElevatedButton(
               onPressed: () {
-                // Tambahkan navigasi jika diperlukan
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MasukAkunPage(),
+                    )
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 33, 72, 243),

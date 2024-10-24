@@ -71,7 +71,7 @@ class HomePage extends StatelessWidget {
                       SizedBox(width: 15),
                       OutlinedButton(
                         onPressed: () {
-                          // Navigasi atau aksi saat Sign In ditekan
+                          Navigator.pushNamed(context, '/masuk_akun');
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white, 
