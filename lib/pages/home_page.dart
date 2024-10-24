@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'Menghadirkan\nkacamata terbaik,\nsesuai dengan kebutuhan pengguna, dan\n kisah inspiratif dalam gaya.',
+                    'Menghadirkan\nkacamata terbaik,\nsesuai dengan kebutuhan pengguna, dan\nkisah inspiratif dalam gaya.',
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 18, // Ukuran teks deskripsi lebih besar
