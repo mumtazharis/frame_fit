@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'daftar_berhasil.dart'; 
 
 class DaftarVerifikasi extends StatefulWidget {
   final String email;
@@ -261,13 +262,18 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                 SizedBox(height: 30),
                 // Tombol Daftar
                 Center(
-                  child: ElevatedButton(
+                child: ElevatedButton(
                     onPressed: (_isCodeValid && _isPasswordValid && _isFirstNameValid && _isLastNameValid)
                         ? () {
-                            // Aksi jika semua validasi terpenuhi
-                            print("Akun berhasil dibuat!");
+                            // Aksi jika checkbox sudah dicentang dan email valid
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DaftarBerhasil(),
+                              ),
+                            );
                           }
-                        : null, // Disable jika tidak valid
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 33, 72, 243),
                       shape: RoundedRectangleBorder(
