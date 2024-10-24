@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frame_fit/pages/loading_screen.dart';
 import 'package:frame_fit/pages/masuk_akun.dart';
 
 class DaftarBerhasil extends StatelessWidget {
@@ -34,7 +35,7 @@ class DaftarBerhasil extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MasukAkunPage(),
+                    builder: (context) => LoadingScreen(),
                     )
                 );
               },
