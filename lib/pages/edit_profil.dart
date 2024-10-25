@@ -16,7 +16,7 @@ class EditProfilePage extends StatelessWidget {
             Navigator.pop(context);
           },
           child: const Text(
-            'Cancel',
+            'Batal',
             style: TextStyle(color: Colors.black),
           ),
         ),
@@ -25,7 +25,7 @@ class EditProfilePage extends StatelessWidget {
           TextButton(
             onPressed: null,
             child: const Text(
-              'Save',
+              'Simpan',
               style: TextStyle(color: Colors.grey), // Ubah warna teks menjadi biru
             ),
           ),
@@ -64,11 +64,11 @@ class EditProfilePage extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextFieldContainer('First Name', 'Joko'),
+                    child: _buildTextFieldContainer('Nama Awal', 'Joko'),
                   ),
                   const SizedBox(width: 16), // Beri jarak antara kedua kotak
                   Expanded(
-                    child: _buildTextFieldContainer('Last Name', 'Tingkir'),
+                    child: _buildTextFieldContainer('Nama Akhir', 'Tingkir'),
                   ),
                 ],
               ),
@@ -77,7 +77,7 @@ class EditProfilePage extends StatelessWidget {
               _buildTextFieldContainer('Email', 'Baputritaz@polinema.ac.id'),
               const SizedBox(height: 8),
               // Kotak untuk Phone Number
-              _buildTextFieldContainer('Phone Number', '+62 822 2899 8041'),
+              _buildTextFieldContainer('Nomor HP', '+62 822 2899 8041'),
             ],
           ),
         ),

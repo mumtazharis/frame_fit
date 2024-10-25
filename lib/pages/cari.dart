@@ -39,7 +39,7 @@ class _CariPageState extends State<CariPage> {
         title: TextField(
           controller: _CariController,
           decoration: InputDecoration(
-            hintText: 'Cari Product',
+            hintText: 'Cari Produk',
             border: InputBorder.none,
             prefixIcon: Icon(Icons.search, color: Colors.black),
             suffixIcon: _CariController.text.isNotEmpty
@@ -62,12 +62,12 @@ class _CariPageState extends State<CariPage> {
               // Membatalkan pencarian dan kembali ke halaman sebelumnya
               Navigator.pop(context);
             },
-            child: Text('Cancel', style: TextStyle(color: Colors.black)),
+            child: Text('Batal', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
       body: _CariResults.isEmpty
-          ? Center(child: Text('No results found', style: TextStyle(fontSize: 18)))
+          ? Center(child: Text('Tidak ada hasil yang cocok', style: TextStyle(fontSize: 18)))
           : ListView.builder(
               itemCount: _CariResults.length,
               itemBuilder: (context, index) {

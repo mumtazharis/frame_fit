@@ -17,9 +17,9 @@ class BerandaPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildCategoryTab('All', isSelected: true),
-                _buildCategoryTab('Men Collection'),
-                _buildCategoryTab('Women Collection'),
+                _buildCategoryTab('Semua', isSelected: true),
+                _buildCategoryTab('Koleksi Pria'),
+                _buildCategoryTab('Koleksi Wanita'),
               ],
             ),
           ),
@@ -142,18 +142,18 @@ class Glasses {
 final List<Glasses> glassesList = [
   Glasses(
       name: 'Aviator Glasses',
-      category: 'Men',
+      category: 'Pria',
       imagePath: 'assets/images/aviator.jpg'),
   Glasses(
       name: 'Ray-Ban Wayfarer Glasses',
-      category: 'Men',
+      category: 'Pria',
       imagePath: 'assets/images/wayfarer.jpg'),
   Glasses(
       name: 'Hexagonal Pink Glasses',
-      category: 'Women',
+      category: 'Wanita',
       imagePath: 'assets/images/hexagonal.jpg'),
   Glasses(
       name: 'Black Bold Square Glasses',
-      category: 'Women',
+      category: 'Wanita',
       imagePath: 'assets/images/square.jpg'),
 ];
