@@ -81,7 +81,7 @@ class ProfilePage extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.support_agent),
-                title: const Text('Bantuan'),
+                title: const Text('Kontak Kami'),
                 onTap: () {},
               ),
               ListTile(
