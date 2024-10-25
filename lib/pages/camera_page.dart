@@ -10,6 +10,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
 class CameraPage extends StatefulWidget {
+  const CameraPage({Key? key}) : super(key: key);
   @override
   _CameraPageState createState() => _CameraPageState();
 }
@@ -23,7 +24,7 @@ class _CameraPageState extends State<CameraPage> {
   final ImagePicker _picker = ImagePicker(); // Inisialisasi ImagePicker
 
   @override
-   void initState() {
+    void initState() {
     super.initState();
     _initializeCamera();
   }
@@ -53,19 +54,36 @@ class _CameraPageState extends State<CameraPage> {
       return;
     }
 
-    final image = await _cameraController!.takePicture();
-    if (mounted) {
-      setState(() {
-        _imagePath = image.path;
-      });
-    }
+    try {
+      // Ambil gambar
+      final image = await _cameraController!.takePicture();
 
-    if (_cameras![_selectedCameraIndex].lensDirection == CameraLensDirection.front) {
-      await _mirrorImage(_imagePath!);
-    }
+      if (mounted) {
+        setState(() {
+          _imagePath = image.path;
+        });
+      }
 
-    await _goToPreviewPage();
+      // Cek apakah kamera yang digunakan adalah kamera belakang
+      if (_cameras![_selectedCameraIndex].lensDirection == CameraLensDirection.back) {
+        // Matikan flash setelah mengambil foto
+        await _cameraController!.setFlashMode(FlashMode.off);
+        _isFlashOn = false;
+        setState(() {});
+      }
+
+      // Jika menggunakan kamera depan, gambar perlu dicerminkan (mirrored)
+      if (_cameras![_selectedCameraIndex].lensDirection == CameraLensDirection.front) {
+        await _mirrorImage(_imagePath!);
+      }
+
+      // Pergi ke halaman preview
+      await _goToPreviewPage();
+    } catch (e) {
+      print('Error saat mengambil gambar: $e');
+    }
   }
+
 
   Future<void> _mirrorImage(String imagePath) async {
     final originalImage = img.decodeImage(File(imagePath).readAsBytesSync());
@@ -84,7 +102,6 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _goToPreviewPage() async {
-   
     if (_imagePath != null) {
       if (mounted) {
         showDialog(
@@ -101,13 +118,17 @@ class _CameraPageState extends State<CameraPage> {
         );
       }
 
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
         Navigator.of(context).pop();
-        Navigator.push(
+        final result = await Navigator.push(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => ImagePreviewPage(imagePath: _imagePath!),
+            pageBuilder: (context, animation, secondaryAnimation) => ImagePreviewPage(
+              imagePath: _imagePath!,
+              selectedCameraIndex: _selectedCameraIndex, // Kirim nilai selectedCameraIndex
+               cameraController: _cameraController!,
+            ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               const begin = Offset(1.0, 0.0);
               const end = Offset.zero;
@@ -123,9 +144,17 @@ class _CameraPageState extends State<CameraPage> {
             },
           ),
         );
+
+        // Menerima selectedCameraIndex yang dikembalikan dari halaman lain
+        if (result != null && result is int) {
+          setState(() {
+            _selectedCameraIndex = result;
+          });
+        }
       }
     }
   }
+
 
   void _switchCamera() async {
     if (_cameras == null || _cameras!.isEmpty) {
@@ -231,7 +260,9 @@ class _CameraPageState extends State<CameraPage> {
                   child: _cameraController == null || !_cameraController!.value.isInitialized
                       ? const Center(child: CircularProgressIndicator())
                       : SizedBox.expand(
-                          child: CameraPreviewWidget(cameraController: _cameraController!),
+                          child: CameraPreviewWidget(
+                            cameraController: _cameraController!,
+                            showCircleOverlay: true),
                         ),
                 ),
                 Expanded(

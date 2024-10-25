@@ -3,8 +3,13 @@ import 'package:camera/camera.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
   final CameraController cameraController;
+  final bool showCircleOverlay; // Tambahkan parameter ini
 
-  const CameraPreviewWidget({Key? key, required this.cameraController}) : super(key: key);
+  const CameraPreviewWidget({
+    Key? key,
+    required this.cameraController,
+    this.showCircleOverlay = true, // Default adalah true
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +17,8 @@ class CameraPreviewWidget extends StatelessWidget {
       children: [
         // Tampilkan preview kamera
         _buildCameraPreview(),
-        // Tambahkan lingkaran panduan
-        _buildCircleOverlay(),
+        // Tampilkan lingkaran panduan jika showCircleOverlay adalah true
+        if (showCircleOverlay) _buildCircleOverlay(),
       ],
     );
   }
@@ -36,11 +41,10 @@ class CameraPreviewWidget extends StatelessWidget {
   Widget _buildCircleOverlay() {
     return Center(
       child: Container(
-        width: 300, // Diameter lingkaran
-        height: 300, // Diameter lingkaran
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 3), // Warna dan ketebalan garis lingkaran
+        width: 400, // Diameter lingkaran
+        height: 400, // Diameter lingkaran
+        child: Image.asset(
+          'assets/images/lingkaran.png',
         ),
       ),
     );
