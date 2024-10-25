@@ -85,7 +85,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                           // Tombol Sign In
                           ElevatedButton(
                             onPressed: () {
-                              // Add your login logic here
+                                Navigator.pushReplacementNamed(context, '/beranda');
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor:  const Color.fromARGB(255, 33, 72, 243),
