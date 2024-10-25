@@ -57,6 +57,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/aviator.jpg
+    - assets/images/wayfarer.jpg
+    - assets/images/hexagonal.jpg
+    - assets/images/square.jpg
+    - assets/images/profile.jpg
     - assets/images/logo_pt.png
     - assets/images/background.png
     - assets/images/logo.png
@@ -65,6 +70,7 @@ flutter:
     - assets/icon/x.png
     - assets/icon/apk.png
     - assets/icon/alert_icon.png
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -3,6 +3,8 @@ import 'pages/home_page.dart';
 import 'pages/camera_page.dart';
 import 'pages/daftar.dart';
 import 'pages/masuk_akun.dart';
+import 'pages/profil.dart';
+import 'pages/beranda.dart';
 
 
 void main() {
@@ -13,6 +15,8 @@ void main() {
       '/camera': (context) => CameraPage(),
       '/daftar': (context) => DaftarPage(),
       '/masuk_akun': (context) => MasukAkunPage(),
+      '/profil': (context) => ProfilePage(),
+      '/beranda': (context) => BerandaPage(),
     },
   ));
 }
