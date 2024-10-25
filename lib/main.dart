@@ -5,6 +5,7 @@ import 'pages/daftar.dart';
 import 'pages/masuk_akun.dart';
 import 'pages/profil.dart';
 import 'pages/beranda.dart';
+import 'pages/cari.dart';
 
 
 void main() {
@@ -17,6 +18,7 @@ void main() {
       '/masuk_akun': (context) => MasukAkunPage(),
       '/profil': (context) => ProfilePage(),
       '/beranda': (context) => BerandaPage(),
+      '/cari': (context) => CariPage(),
     },
   ));
 }
