@@ -102,64 +102,61 @@ class _ARPreviewPageState extends State<ARPreviewPage> {
                     cameraController: _cameraController!,
                     showCircleOverlay: false,
                   ),
-
-                  // Bagian kode di dalam map loop untuk widget kacamata
                   ..._faces.map((face) {
                     final leftEye = face.landmarks[FaceLandmarkType.leftEye];
                     final rightEye = face.landmarks[FaceLandmarkType.rightEye];
-                    final noseBase = face.landmarks[FaceLandmarkType.noseBase];
 
-                    if (leftEye != null && rightEye != null && noseBase != null) {
-                      final eyeLeftPosition = leftEye.position;
-                      final eyeRightPosition = rightEye.position;
-                      final nosePosition = noseBase.position;
+                   if (leftEye != null && rightEye != null) {
+                    final eyeLeftPosition = leftEye.position;
+                    final eyeRightPosition = rightEye.position;
 
-                      // Hitung titik tengah antara kedua mata
-                      var centerX = (eyeLeftPosition.x + eyeRightPosition.x) / 2;
-                      var centerY = (eyeLeftPosition.y + eyeRightPosition.y) / 2;
+                    // Hitung titik tengah antara kedua mata
+                    var centerX = (eyeLeftPosition.x + eyeRightPosition.x) / 2;
+                    var centerY = (eyeLeftPosition.y + eyeRightPosition.y) / 2;
 
-                      // Hitung lebar kacamata berdasarkan jarak antara kedua mata
-                      double width = (eyeRightPosition.x - eyeLeftPosition.x) * 1.5;
-                      double height = width * 0.5;
+                    // Ukuran kacamata berdasarkan jarak antara kedua mata
+                    double width = (eyeRightPosition.x - eyeLeftPosition.x) * 1.5; // Lebar kacamata
+                    double height = width * 0.5; // Tinggi kacamata, misalnya setengah dari lebar
 
-                      // Perhitungan sudut rotasi
-                      double dx = eyeRightPosition.x - eyeLeftPosition.x;
-                      double dy = eyeRightPosition.y - eyeLeftPosition.y;
-                      double rotationAngle = math.atan2(dy, dx);
+                    // Sesuaikan posisi Y kacamata agar lebih pas di atas mata
+                    double adjustedY = centerY - (height * 0.6); // Ubah faktor ini sesuai kebutuhan
 
-                      // Sesuaikan posisi Y kacamata agar lebih pas di atas mata
-                      double adjustedY = centerY - (height * 0.6);
-                      adjustedY = adjustedY < 0 ? 0 : adjustedY;
+                    // Jangan biarkan kacamata berada di luar layar (di atas layar)
+                    adjustedY = adjustedY < 0 ? 0 : adjustedY;
 
-                      // Batasi agar kacamata tidak keluar layar
-                      if (centerX - (width / 2) < 0) {
-                        centerX = width / 2;
-                      }
-                      if (centerX + (width / 2) > screenSize.width) {
-                        centerX = screenSize.width - (width / 2);
-                      }
-
-                      // Balikkan posisi X agar kacamata sesuai arah wajah
-                      centerX = screenSize.width - centerX;
-
-                      return Positioned(
-                        left: centerX - (width / 2),
-                        top: adjustedY - (height / 2),
-                        child: Transform.rotate(
-                          angle: rotationAngle, // Rotasi kacamata berdasarkan sudut mata
-                          child: Image.asset(
-                            'assets/kacamata/square.png',
-                            width: width,
-                            height: height,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      );
-                    } else {
-                      return SizedBox();
+                    // Jangan biarkan kacamata berada di luar batas layar
+                    if (centerX - (width / 2) < 0) {
+                      centerX = width / 2; // Atur centerX agar tidak keluar layar kiri
                     }
-                  }).toList(),
+                    if (centerX + (width / 2) > screenSize.width) {
+                      centerX = screenSize.width - (width / 2); // Atur centerX agar tidak keluar layar kanan
+                    }
 
+                    // Balikkan posisi X untuk mencocokkan arah mata
+                    centerX = screenSize.width - centerX;
+
+                    print('Kacamata - Posisi X: $centerX, Posisi Y: $adjustedY, Width: $width, Height: $height');
+
+                    return Positioned(
+                      left: centerX, // Tempatkan kacamata di tengah
+                      top: adjustedY - (height / 2), // Tempatkan kacamata di posisi yang disesuaikan
+                      child: Image.asset(
+                        'assets/kacamata/square.png',
+                        width: width,
+                        height: height,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('Error loading image: $error');
+                          return Text('Error loading image');
+                        },
+                      ),
+                    );
+                  } else {
+                    return SizedBox(); // Kembali dengan ukuran kosong jika tidak ada mata
+                  }
+
+
+                  }).toList(),
                 ],
               ),
             )
