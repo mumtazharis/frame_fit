@@ -42,6 +42,7 @@ class _ARPreviewPageState extends State<ARPreviewPage> {
     _cameraController = CameraController(
       cameras[widget.selectedCameraIndex],
       ResolutionPreset.high,
+      enableAudio: false
     );
 
     try {

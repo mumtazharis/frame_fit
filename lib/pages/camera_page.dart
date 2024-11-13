@@ -8,6 +8,9 @@ import '../widgets/camera_control_widget.dart';
 import 'preview_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../config/api_config.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({Key? key}) : super(key: key);
@@ -64,18 +67,13 @@ class _CameraPageState extends State<CameraPage> {
         });
       }
 
-      // Cek apakah kamera yang digunakan adalah kamera belakang
-      if (_cameras![_selectedCameraIndex].lensDirection == CameraLensDirection.back) {
-        // Matikan flash setelah mengambil foto
-        await _cameraController!.setFlashMode(FlashMode.off);
-        _isFlashOn = false;
-        setState(() {});
-      }
-
       // Jika menggunakan kamera depan, gambar perlu dicerminkan (mirrored)
       if (_cameras![_selectedCameraIndex].lensDirection == CameraLensDirection.front) {
         await _mirrorImage(_imagePath!);
       }
+
+      // Kirim gambar ke API predict
+      await _sendImageToPredictApi(_imagePath!);
 
       // Pergi ke halaman preview
       await _goToPreviewPage();
@@ -118,7 +116,10 @@ class _CameraPageState extends State<CameraPage> {
         );
       }
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Mengambil prediksi dari API
+      final predictionResult = await _sendImageToPredictApi(_imagePath!);
+
+      await Future.delayed(const Duration(milliseconds: 100));
       if (mounted) {
         Navigator.of(context).pop();
         final result = await Navigator.push(
@@ -127,7 +128,8 @@ class _CameraPageState extends State<CameraPage> {
             pageBuilder: (context, animation, secondaryAnimation) => ImagePreviewPage(
               imagePath: _imagePath!,
               selectedCameraIndex: _selectedCameraIndex, // Kirim nilai selectedCameraIndex
-               cameraController: _cameraController!,
+              cameraController: _cameraController!,
+              predictionResult: predictionResult, // Kirim hasil prediksi
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               const begin = Offset(1.0, 0.0);
@@ -145,7 +147,6 @@ class _CameraPageState extends State<CameraPage> {
           ),
         );
 
-        // Menerima selectedCameraIndex yang dikembalikan dari halaman lain
         if (result != null && result is int) {
           setState(() {
             _selectedCameraIndex = result;
@@ -154,6 +155,7 @@ class _CameraPageState extends State<CameraPage> {
       }
     }
   }
+
 
 
   void _switchCamera() async {
@@ -169,7 +171,7 @@ class _CameraPageState extends State<CameraPage> {
 
     _cameraController = CameraController(
       _cameras![_selectedCameraIndex],
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
     );
 
     try {
@@ -244,6 +246,40 @@ class _CameraPageState extends State<CameraPage> {
       print("Error resetting brightness: $e");
     }
   }
+
+  Future<Map<String, dynamic>?> _sendImageToPredictApi(String imagePath) async {
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse('${ApiConfig.baseUrl}/api/predict'));
+      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final Map<String, dynamic> responseJson = jsonDecode(responseBody);
+
+        // Mengembalikan map dengan nilai predicted_label dan confidence
+        return {
+          'predicted_label': responseJson['predicted_label'],
+          'confidence': responseJson['confidence'],
+        };
+      } 
+      else {
+        // Jika status bukan 200, ambil pesan error dari JSON respons
+        final responseBody = await response.stream.bytesToString();
+        final Map<String, dynamic> errorJson = jsonDecode(responseBody);
+        
+        // Menampilkan pesan error
+        print('Error: ${errorJson['error']}');
+        return {'error': errorJson['error']}; // Kembalikan pesan error
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {

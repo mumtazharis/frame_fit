@@ -1,6 +1,10 @@
-import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 import 'daftar.dart';
+import 'beranda.dart';
+import '../config/api_config.dart';
 
 class MasukAkunPage extends StatefulWidget {
   @override
@@ -12,6 +16,51 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   String? _errorMessage;
+
+  // Fungsi untuk mengirimkan request login ke API
+  Future<void> _login() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Email dan password tidak boleh kosong.';
+      });
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/api/users/login'), // Ganti dengan endpoint login Anda
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'username': email,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Jika login berhasil, simpan token
+      final Map<String, dynamic> responseBody = json.decode(response.body);
+      final String token = responseBody['access_token'];
+
+      // Simpan token di SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('access_token', token);
+
+      // Arahkan ke halaman beranda
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => BerandaPage()),
+      );
+    } else {
+      // Jika login gagal, tampilkan pesan error
+      setState(() {
+        _errorMessage = 'Email atau password salah.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +133,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                           SizedBox(height: 30),
                           // Tombol Sign In
                           ElevatedButton(
-                            onPressed: () {
-                                Navigator.pushReplacementNamed(context, '/beranda');
-                            },
+                            onPressed: _login, // Panggil fungsi login
                             style: ElevatedButton.styleFrom(
                               backgroundColor:  const Color.fromARGB(255, 33, 72, 243),
                               shape: RoundedRectangleBorder(
@@ -99,6 +146,14 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                               style: TextStyle(fontSize: 16, color: Colors.white),
                             ),
                           ),
+                          if (_errorMessage != null) // Menampilkan pesan error
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(color: Colors.red, fontSize: 14),
+                              ),
+                            ),
                           SizedBox(height: 30),
                           // Tombol sosial media
                           Row(
