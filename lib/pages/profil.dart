@@ -71,22 +71,22 @@ class ProfilePage extends StatelessWidget {
               // List Menu
               ListTile(
                 leading: const Icon(Icons.lock),
-                title: const Text('Reset Password'),
+                title: const Text('Ganti Password'),
                 onTap: () {},
               ),
               ListTile(
                 leading: const Icon(Icons.subscriptions),
-                title: const Text('Subscription'),
+                title: const Text('Langganan'),
                 onTap: () {},
               ),
               ListTile(
                 leading: const Icon(Icons.support_agent),
-                title: const Text('Support'),
+                title: const Text('Kontak Kami'),
                 onTap: () {},
               ),
               ListTile(
                 leading: const Icon(Icons.info),
-                title: const Text('About us'),
+                title: const Text('Tentang Kami'),
                 onTap: () {},
               ),
 
