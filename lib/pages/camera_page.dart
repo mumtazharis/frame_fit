@@ -72,9 +72,6 @@ class _CameraPageState extends State<CameraPage> {
         await _mirrorImage(_imagePath!);
       }
 
-      // Kirim gambar ke API predict
-      await _sendImageToPredictApi(_imagePath!);
-
       // Pergi ke halaman preview
       await _goToPreviewPage();
     } catch (e) {
