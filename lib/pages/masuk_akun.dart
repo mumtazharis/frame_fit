@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frame_fit/pages/loading_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
-import 'daftar.dart';
 import 'beranda.dart';
 import '../config/api_config.dart';
 
@@ -17,7 +17,6 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
   bool _isPasswordVisible = false;
   String? _errorMessage;
 
-  // Fungsi untuk mengirimkan request login ke API
   Future<void> _login() async {
     final String email = _emailController.text;
     final String password = _passwordController.text;
@@ -30,7 +29,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
     }
 
     final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/api/users/login'), // Ganti dengan endpoint login Anda
+      Uri.parse('${ApiConfig.baseUrl}/api/users/login'),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
@@ -41,21 +40,19 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
     );
 
     if (response.statusCode == 200) {
-      // Jika login berhasil, simpan token
       final Map<String, dynamic> responseBody = json.decode(response.body);
       final String token = responseBody['access_token'];
 
-      // Simpan token di SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('access_token', token);
 
-      // Arahkan ke halaman beranda
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => BerandaPage()),
+        MaterialPageRoute(
+          builder: (context) => LoadingScreen(nextPage: 'BerandaPage'),
+        ),
       );
     } else {
-      // Jika login gagal, tampilkan pesan error
       setState(() {
         _errorMessage = 'Email atau password salah.';
       });
@@ -65,31 +62,31 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Prevent overflow when the keyboard appears
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight, // Match height to fit content
+                  minHeight: constraints.maxHeight,
                 ),
                 child: IntrinsicHeight(
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start, // Posisi elemen ke atas
                         children: <Widget>[
-                          // Logo
+                          // Menggeser logo lebih kebawah
+                          SizedBox(height: 90), // Menambah jarak lebih besar dari atas
                           Image.asset(
                             'assets/images/logo_pt.png',
                             width: 175,
                             height: 175,
                           ),
-                          SizedBox(height: 40),
-                          SizedBox(height: 50),
-                          // Input Email
+                          // Menambah jarak setelah logo
+                          SizedBox(height: 80), // Jarak lebih besar setelah logo
                           Container(
                             width: 350,
                             child: TextField(
@@ -104,8 +101,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 16),
-                          // Input Password
+                          SizedBox(height: 16), // Jarak antar input
                           Container(
                             width: 350,
                             child: TextField(
@@ -130,12 +126,11 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 30),
-                          // Tombol Sign In
+                          SizedBox(height: 30), // Jarak sebelum tombol
                           ElevatedButton(
-                            onPressed: _login, // Panggil fungsi login
+                            onPressed: _login,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:  const Color.fromARGB(255, 33, 72, 243),
+                              backgroundColor: const Color.fromARGB(255, 33, 72, 243),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -146,7 +141,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                               style: TextStyle(fontSize: 16, color: Colors.white),
                             ),
                           ),
-                          if (_errorMessage != null) // Menampilkan pesan error
+                          if (_errorMessage != null)
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
@@ -154,74 +149,6 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                                 style: TextStyle(color: Colors.red, fontSize: 14),
                               ),
                             ),
-                          SizedBox(height: 30),
-                          // Tombol sosial media
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Divider(
-                                  thickness: 2, 
-                                  color: Colors.black, 
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: Text('atau masuk dengan'),
-                              ),
-                              Expanded(
-                                child: Divider(
-                                  thickness: 2, 
-                                  color: Colors.black, 
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                          // Tombol sosial media
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: Image.asset('assets/icon/gmail.png', width: 36, height: 36),
-                              ),
-                              SizedBox(width: 16),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.facebook, size: 36, color: Colors.blue),
-                              ),
-                              SizedBox(width: 16),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Image.asset('assets/icon/x.png', width: 36, height: 36),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 30),
-                          // Link to Sign Up
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("Belum punya akun? "),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DaftarPage(), // Navigate to DaftarPage
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  "Daftar",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),

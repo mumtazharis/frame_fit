@@ -5,55 +5,54 @@ class BerandaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Menambahkan SizedBox untuk memberi jarak di bagian atas
-          SizedBox(height: 20), // Sesuaikan nilai height untuk jarak yang diinginkan
-
-          // Bagian tab pilihan koleksi
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildCategoryTab('Semua', isSelected: true),
-                _buildCategoryTab('Koleksi Pria'),
-                _buildCategoryTab('Koleksi Wanita'),
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
-          Divider(thickness: 1),
-
-          // Bagian daftar produk kacamata
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Menampilkan 2 kolom
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 0.75, // Memperbaiki proporsi item
-                ),
-                itemCount: glassesList.length,
-                itemBuilder: (context, index) {
-                  final glasses = glassesList[index];
-                  return _buildProductCard(glasses);
-                },
+      body: SafeArea( // Mencegah konten tertutup status bar
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header dengan padding lebih baik
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildCategoryTab('Semua', isSelected: true),
+                  _buildCategoryTab('Koleksi Pria'),
+                  _buildCategoryTab('Koleksi Wanita'),
+                ],
               ),
             ),
-          ),
-        ],
+            Divider(thickness: 1, color: Colors.grey.shade300),
+
+            // Daftar produk kacamata
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, // Menampilkan 2 kolom
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.75, // Proporsi elemen dalam grid
+                  ),
+                  itemCount: glassesList.length,
+                  itemBuilder: (context, index) {
+                    final glasses = glassesList[index];
+                    return _buildProductCard(glasses);
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
-        currentIndex: 0, // Home sebagai tab aktif
+        currentIndex: 0, // Tab aktif
         onTap: (index) {
-          // Navigasi berdasarkan index yang dipilih
+          // Navigasi ke tab berdasarkan index
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/beranda');
@@ -69,7 +68,7 @@ class BerandaPage extends StatelessWidget {
               break;
           }
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
           BottomNavigationBarItem(
@@ -109,20 +108,28 @@ class BerandaPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: Image.asset(
-            glasses.imagePath,
-            fit: BoxFit.cover,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              color: Colors.grey.shade200,
+              image: DecorationImage(
+                image: AssetImage(glasses.imagePath),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(
           glasses.name,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
-        SizedBox(height: 3),
+        const SizedBox(height: 3),
         Text(
           glasses.category,
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -135,25 +142,33 @@ class Glasses {
   final String category;
   final String imagePath;
 
-  Glasses({required this.name, required this.category, required this.imagePath});
+  Glasses({
+    required this.name,
+    required this.category,
+    required this.imagePath,
+  });
 }
 
 // Daftar produk kacamata
 final List<Glasses> glassesList = [
   Glasses(
-      name: 'Aviator Glasses',
-      category: 'Pria',
-      imagePath: 'assets/images/aviator.jpg'),
+    name: 'Aviator Glasses',
+    category: 'Pria',
+    imagePath: 'assets/images/aviator.jpg',
+  ),
   Glasses(
-      name: 'Ray-Ban Wayfarer Glasses',
-      category: 'Pria',
-      imagePath: 'assets/images/wayfarer.jpg'),
+    name: 'Ray-Ban Wayfarer Glasses',
+    category: 'Pria',
+    imagePath: 'assets/images/wayfarer.jpg',
+  ),
   Glasses(
-      name: 'Hexagonal Pink Glasses',
-      category: 'Wanita',
-      imagePath: 'assets/images/hexagonal.jpg'),
+    name: 'Hexagonal Pink Glasses',
+    category: 'Wanita',
+    imagePath: 'assets/images/hexagonal.jpg',
+  ),
   Glasses(
-      name: 'Black Bold Square Glasses',
-      category: 'Wanita',
-      imagePath: 'assets/images/square.jpg'),
+    name: 'Black Bold Square Glasses',
+    category: 'Wanita',
+    imagePath: 'assets/images/square.jpg',
+  ),
 ];
