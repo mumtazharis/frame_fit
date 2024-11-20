@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'daftar_berhasil.dart'; 
+import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
+import 'dart:convert';
 
 class DaftarVerifikasi extends StatefulWidget {
   final String email;
@@ -34,6 +37,110 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
     _startResendTimer();
   }
 
+
+  Future<void> _registerUser() async {
+    setState(() {
+      _isLoading = true;  // Menampilkan indikator loading saat request sedang berlangsung
+    });
+
+    // Menyiapkan data yang akan dikirim ke server
+    final String email = widget.email;
+    final String otp = _codeController.text;
+    final String password = _passwordController.text;
+    final String firstName = _firstNameController.text;
+    final String lastName = _lastNameController.text;
+
+    final Map<String, dynamic> data = {
+      'email': email,
+      'otp': otp,
+      'password': password,
+      'first_name': firstName,
+      'last_name': lastName,
+    };
+
+    final Uri url = Uri.parse('${ApiConfig.baseUrl}/api/users/register'); // Ganti dengan URL API Anda
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 201) {
+        // Jika registrasi berhasil, arahkan ke halaman berhasil
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DaftarBerhasil(),
+          ),
+        );
+      } else {
+        // Jika terjadi kesalahan, tampilkan pesan kesalahan
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData['message'] ?? 'Terjadi kesalahan')),
+        );
+      }
+    } catch (error) {
+      // Menangani kesalahan saat mengirim request
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $error')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;  // Menyembunyikan indikator loading setelah request selesai
+      });
+    }
+  }
+
+  Future<void> _resendOtp() async {
+    setState(() {
+      _isLoading = true; // Menampilkan indikator loading
+    });
+
+    final String email = widget.email;
+
+    final Map<String, dynamic> data = {
+      'email': email,
+    };
+
+    final Uri url = Uri.parse('${ApiConfig.baseUrl}/api/users/sendotp'); // Ganti dengan URL API Anda
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 200) {
+        // Jika permintaan berhasil, mulai ulang timer
+        setState(() {
+          _resendTimer = 30;
+          _startResendTimer();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('OTP berhasil dikirim ulang')),
+        );
+      } else {
+        // Jika terjadi kesalahan
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData['message'] ?? 'Terjadi kesalahan saat mengirim ulang OTP')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $error')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false; // Menyembunyikan indikator loading setelah request selesai
+      });
+    }
+  }
+
   void _startResendTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_resendTimer == 0) {
@@ -54,7 +161,7 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
 
   void _validateForm() {
     setState(() {
-      _isCodeValid = _codeController.text.length == 5;
+      _isCodeValid = _codeController.text.length == 6;
       _isFirstNameValid = _firstNameController.text.isNotEmpty;
       _isLastNameValid = _lastNameController.text.isNotEmpty;
       _isPasswordValid = _passwordController.text.length >= 8 &&
@@ -117,23 +224,12 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                 // Input Kode Verifikasi
                 TextField(
                   controller: _codeController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 5,
+                  // keyboardType: TextInputType.number,
+                  maxLength: 6,
                   onChanged: (value) => _validateForm(),
                   decoration: InputDecoration(
                     labelText: 'Kode',
                     border: OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.refresh),
-                      onPressed: _resendTimer == 0
-                          ? () {
-                              setState(() {
-                                _resendTimer = 30;
-                                _startResendTimer();
-                              });
-                            }
-                          : null,
-                    ),
                   ),
                 ),
                 SizedBox(height: 1),
@@ -147,11 +243,8 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                         children: [
                           TextButton(
                             onPressed: () {
-                              // Aksi kirim ulang kode jika waktunya habis
-                              setState(() {
-                                _resendTimer = 30;
-                                _startResendTimer();
-                              });
+                              // Kirim ulang OTP
+                              _resendOtp(); // Memanggil fungsi resend OTP
                             },
                             child: Text('Kirim Ulang Sekarang'),
                           ),
@@ -262,16 +355,11 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                 SizedBox(height: 30),
                 // Tombol Daftar
                 Center(
-                child: ElevatedButton(
+                  child: ElevatedButton(
                     onPressed: (_isCodeValid && _isPasswordValid && _isFirstNameValid && _isLastNameValid)
                         ? () {
-                            // Aksi jika checkbox sudah dicentang dan email valid
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DaftarBerhasil(),
-                              ),
-                            );
+                            // Panggil fungsi untuk registrasi user
+                            _registerUser();
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
@@ -281,10 +369,12 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 135, vertical: 20),
                     ),
-                    child: Text(
-                      'Buat Akun',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                    child: _isLoading
+                        ? CircularProgressIndicator(color: Colors.white)  // Menampilkan loading jika sedang request
+                        : Text(
+                            'Buat Akun',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                   ),
                 ),
               ],

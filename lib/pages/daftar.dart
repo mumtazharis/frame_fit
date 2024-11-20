@@ -1,6 +1,8 @@
-import 'dart:ui';
+import 'dart:convert'; // Untuk jsonEncode
 import 'package:flutter/material.dart';
-import 'daftar_verifikasi.dart'; 
+import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
+import 'daftar_verifikasi.dart'; // Pastikan path file benar
 
 class DaftarPage extends StatefulWidget {
   @override
@@ -11,19 +13,65 @@ class _DaftarPageState extends State<DaftarPage> {
   bool _isChecked = false;
   final TextEditingController _emailController = TextEditingController();
   String? _errorMessage;
+  bool _isLoading = false; // Tambahkan ini untuk status loading
+
+  // Fungsi untuk mengirim permintaan OTP
+  Future<void> sendOtp(String email) async {
+    setState(() {
+      _isLoading = true; // Set status loading ke true
+    });
+
+    final String apiUrl = "${ApiConfig.baseUrl}/api/users/sendotp";
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email}),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('OTP telah dikirim ke $email')),
+        );
+
+        // Navigasi ke halaman verifikasi
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DaftarVerifikasi(email: email),
+          ),
+        );
+      } else {
+        final Map<String, dynamic> responseJson = jsonDecode(response.body);
+        String errorMessage = responseJson['message'] ?? 'Gagal mengirim OTP. Coba lagi nanti.';
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (e) {
+      String errorMessage = 'Kesalahan terjadi saat mengirim OTP: $e';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false; // Set status loading kembali ke false
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Mencegah overflow saat keyboard muncul
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight, // Menyesuaikan tinggi tampilan
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Center(
                     child: Padding(
@@ -31,22 +79,19 @@ class _DaftarPageState extends State<DaftarPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          // Logo dari assets
                           Image.asset(
                             'assets/images/logo_pt.png',
                             width: 175,
                             height: 175,
                           ),
                           SizedBox(height: 70),
-                          // Input Username atau Email dengan ukuran yang lebih kecil
                           Container(
-                            width: 350, // Lebar kotak input yang lebih kecil
+                            width: 350,
                             child: TextField(
                               controller: _emailController,
-                              keyboardType: TextInputType.emailAddress, 
+                              keyboardType: TextInputType.emailAddress,
                               onChanged: (value) {
                                 setState(() {
-                                  // Memeriksa apakah email berakhiran @gmail.com
                                   if (!value.endsWith('@gmail.com')) {
                                     _errorMessage = 'Email harus diakhiri dengan @gmail.com';
                                   } else {
@@ -60,12 +105,11 @@ class _DaftarPageState extends State<DaftarPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 prefixIcon: Icon(Icons.person),
-                                errorText: _errorMessage, // Tampilkan pesan error jika tidak sesuai
+                                errorText: _errorMessage,
                               ),
                             ),
                           ),
                           SizedBox(height: 16),
-                          // Checkbox untuk persetujuan Terms of use dan Privacy Policy
                           Container(
                             width: 360,
                             child: Row(
@@ -77,7 +121,7 @@ class _DaftarPageState extends State<DaftarPage> {
                                       _isChecked = value ?? false;
                                     });
                                   },
-                                  activeColor: Color.fromARGB(255, 33, 72, 243), // Set the active color
+                                  activeColor: Color.fromARGB(255, 33, 72, 243),
                                 ),
                                 Expanded(
                                   child: Text(
@@ -89,41 +133,35 @@ class _DaftarPageState extends State<DaftarPage> {
                             ),
                           ),
                           SizedBox(height: 16),
-                          // Tombol Lanjut
-                          ElevatedButton(
-                            onPressed: (_isChecked && _errorMessage == null && _emailController.text.endsWith('@gmail.com'))
-                                ? () {
-                                    // Aksi jika checkbox sudah dicentang dan email valid
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => DaftarVerifikasi(
-                                          email: _emailController.text, // Mengirim email ke halaman verifikasi
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                : null, // Tombol akan disable jika checkbox belum dicentang atau email tidak valid
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(255, 33, 72, 243),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: EdgeInsets.symmetric(horizontal: 150, vertical: 20),
-                            ),
-                            child: Text(
-                              'Lanjut',
-                              style: TextStyle(fontSize: 16, color: Colors.white),
-                            ),
-                          ),
+                          _isLoading
+                              ? CircularProgressIndicator() // Tampilkan loading jika sedang memproses
+                              : ElevatedButton(
+                                  onPressed: (_isChecked &&
+                                          _errorMessage == null &&
+                                          _emailController.text.endsWith('@gmail.com'))
+                                      ? () {
+                                          sendOtp(_emailController.text); // Panggil fungsi sendOtp
+                                        }
+                                      : null,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color.fromARGB(255, 33, 72, 243),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    padding: EdgeInsets.symmetric(horizontal: 150, vertical: 20),
+                                  ),
+                                  child: Text(
+                                    'Lanjut',
+                                    style: TextStyle(fontSize: 16, color: Colors.white),
+                                  ),
+                                ),
                           SizedBox(height: 30),
-                          // Garis pemisah
                           Row(
                             children: <Widget>[
                               Expanded(
                                 child: Divider(
-                                  thickness: 2, 
-                                  color: Colors.black, 
+                                  thickness: 2,
+                                  color: Colors.black,
                                 ),
                               ),
                               Padding(
@@ -132,14 +170,13 @@ class _DaftarPageState extends State<DaftarPage> {
                               ),
                               Expanded(
                                 child: Divider(
-                                  thickness: 2, 
-                                  color: Colors.black, 
+                                  thickness: 2,
+                                  color: Colors.black,
                                 ),
                               ),
                             ],
                           ),
                           SizedBox(height: 16),
-                          // Tombol sosial media
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
