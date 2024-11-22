@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frame_fit/pages/loading_screen.dart';
-import 'package:frame_fit/pages/masuk_akun.dart';
 
 class DaftarBerhasil extends StatelessWidget {
   @override
@@ -9,16 +8,14 @@ class DaftarBerhasil extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Posisikan konten di tengah
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Menampilkan Icon Logo
             Image.asset(
-              'assets/icon/alert_icon.png', // Path ke icon logo
-              width: 100, // Atur ukuran sesuai kebutuhan
+              'assets/icon/alert_icon.png',
+              width: 100,
               height: 100,
             ),
-            SizedBox(height: 30), // Spasi antar elemen
-            // Menampilkan Pesan
+            SizedBox(height: 30),
             Text(
               'Akun FrameFit Anda berhasil dibuat',
               style: TextStyle(
@@ -26,17 +23,16 @@ class DaftarBerhasil extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
-              textAlign: TextAlign.center, // Sesuaikan teks ke tengah
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 30), // Spasi antar elemen
-            // Tombol Lanjutkan
+            SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoadingScreen(),
-                    )
+                    builder: (context) => LoadingScreen(nextPage: 'MasukAkunPage'),  // Mengirimkan nextPage
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
