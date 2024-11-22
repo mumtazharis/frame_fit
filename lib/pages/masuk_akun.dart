@@ -43,11 +43,13 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
     if (response.statusCode == 200) {
       // Jika login berhasil, simpan token
       final Map<String, dynamic> responseBody = json.decode(response.body);
-      final String token = responseBody['access_token'];
+      final String accessToken = responseBody['access_token'];
+      final String refreshToken = responseBody['refresh_token']; // Tambahkan refresh token
 
       // Simpan token di SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('access_token', token);
+      await prefs.setString('access_token', accessToken);
+      await prefs.setString('refresh_token', refreshToken);
 
       // Arahkan ke halaman beranda
       Navigator.pushReplacement(
@@ -61,6 +63,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
