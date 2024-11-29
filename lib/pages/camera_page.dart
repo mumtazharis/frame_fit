@@ -125,7 +125,6 @@ class _CameraPageState extends State<CameraPage> {
             pageBuilder: (context, animation, secondaryAnimation) => ImagePreviewPage(
               imagePath: _imagePath!,
               selectedCameraIndex: _selectedCameraIndex, // Kirim nilai selectedCameraIndex
-              cameraController: _cameraController!,
               predictionResult: predictionResult, // Kirim hasil prediksi
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {

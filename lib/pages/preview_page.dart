@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'preview_AR.dart';
 import 'dart:io';
-import 'package:camera/camera.dart';
 
 class ImagePreviewPage extends StatelessWidget {
   final String imagePath;
   final int selectedCameraIndex;
-  final CameraController cameraController;
+  // final CameraController cameraController;
   final Map<String, dynamic>? predictionResult;
 
   const ImagePreviewPage({
     Key? key,
     required this.imagePath,
     required this.selectedCameraIndex,
-    required this.cameraController,
+    // required this.cameraController,
     required this.predictionResult,
   }) : super(key: key);
 

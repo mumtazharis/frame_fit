@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: isTokenValid ? '/beranda' : '/masuk_akun', // Sesuaikan rute awal
+      initialRoute: isTokenValid ? '/beranda' : '/', // Sesuaikan rute awal
       routes: {
         '/': (context) => HomePage(),
         '/camera': (context) => CameraPage(),
