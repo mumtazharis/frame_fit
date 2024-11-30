@@ -47,6 +47,7 @@ dependencies:
   google_mlkit_face_detection: ^0.12.0
   http: ^1.2.2
   flutter_riverpod: ^2.6.1
+  card_swiper: ^3.0.1
 
 
 
@@ -77,6 +78,7 @@ flutter:
 
     - assets/images/lingkaran.png
     - assets/kacamata/round.png
+    - assets/kacamata/round2.png
     - assets/kacamata/square.png
   # To add assets to your application, add an assets section, like this:
   # assets:

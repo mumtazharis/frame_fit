@@ -62,6 +62,8 @@ class ImagePreviewPage extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => ARPreviewPage(
                       selectedCameraIndex: selectedCameraIndex,
+                      
+                      bentuk_wajah: predictionResult!['predicted_label'],
                     ),
                   ),
                 );
@@ -73,4 +75,5 @@ class ImagePreviewPage extends StatelessWidget {
       ),
     );
   }
+  
 }

@@ -4,12 +4,16 @@ import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import '../widgets/camera_preview_widget.dart';
 import 'dart:math';
-import 'package:flutter/services.dart'; // Impor yang diperlukan
+import 'package:card_swiper/card_swiper.dart';
+import 'package:http/http.dart' as http;
+import 'package:frame_fit/config/api_config.dart';
+import 'dart:convert';
 
 class ARPreviewPage extends StatefulWidget {
   final int selectedCameraIndex;
+  final String bentuk_wajah;
 
-  ARPreviewPage({Key? key, required this.selectedCameraIndex}) : super(key: key);
+  ARPreviewPage({Key? key, required this.selectedCameraIndex, required this.bentuk_wajah}) : super(key: key);
 
   @override
   _ARPreviewPageState createState() => _ARPreviewPageState();
@@ -19,6 +23,9 @@ class _ARPreviewPageState extends State<ARPreviewPage> {
   late FaceDetector _faceDetector;
   CameraController? _cameraController;
   List<Face> _faces = [];
+  List<String> kacamataAssets = []; // Daftar URL kacamata dari API
+  int selectedGlassesIndex = 0; // Simpan indeks kacamata yang dipilih
+  bool isLoading = true; // Indikator pemuatan data kacamata
 
   @override
   void initState() {
@@ -31,8 +38,55 @@ class _ARPreviewPageState extends State<ARPreviewPage> {
         performanceMode: FaceDetectorMode.fast,
       ),
     );
+      _fetchRekomendasiKacamata();
     _initializeCamera();
   }
+Future<void> _fetchRekomendasiKacamata() async {
+  try {
+    // Debugging: Log URL yang dipanggil
+    print('Fetching glasses recommendation from: ${ApiConfig.baseUrl}/api/rekomendasi_kacamata?bentuk_wajah=${widget.bentuk_wajah}');
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/api/rekomendasi_kacamata?bentuk_wajah=${widget.bentuk_wajah}'),
+    );
+
+    // Debugging: Log status kode dari respons
+    print('Response status code: ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      // Debugging: Log isi body dari respons
+      print('Response body: ${response.body}');
+
+      final List<dynamic> data = json.decode(response.body); // Decode sebagai array JSON
+
+      // Filter dan ambil nilai 'foto' dari setiap objek di array
+      final List<String> photos = data
+          .where((item) => item['foto'] != null) // Pastikan 'foto' tidak null
+          .map<String>((item) => item['foto'] as String) // Ambil nilai 'foto' sebagai String
+          .toList();
+
+      if (photos.isNotEmpty) {
+        setState(() {
+          kacamataAssets = photos; // Simpan URL gambar di daftar
+        });
+        print('Loaded glasses assets: $kacamataAssets');
+      } else {
+        print('No glasses data found for the given face shape');
+      }
+    } else {
+      print('Failed to fetch glasses: ${response.statusCode}');
+    }
+  } catch (e) {
+    // Debugging: Log jika terjadi kesalahan
+    print('Error fetching glasses data: $e');
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+    print('Fetch glasses recommendation completed. isLoading: $isLoading');
+  }
+}
+
 
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
@@ -56,14 +110,6 @@ class _ARPreviewPageState extends State<ARPreviewPage> {
       print('Error initializing camera: $e');
       _showErrorDialog('Error initializing camera: $e');
     }
-  }
-
-  // Fungsi untuk mengunci orientasi tampilan ke portrait
-  void _setPortraitOrientation() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
   }
 
 
@@ -126,7 +172,6 @@ class _ARPreviewPageState extends State<ARPreviewPage> {
       },
     );
   }
-
 @override
 Widget build(BuildContext context) {
   double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -134,14 +179,14 @@ Widget build(BuildContext context) {
 
   return Scaffold(
     body: _cameraController != null && _cameraController!.value.isInitialized
-        ? Column(
+        ? Stack(
             children: [
               // Video dengan rasio 3:4 di bagian atas
               Padding(
                 padding: EdgeInsets.only(top: statusBarHeight),
                 child: Container(
                   width: screenSize.width,
-                  height: screenSize.width * 4 / 3, // Rasio 3:4
+                  height: screenSize.height * 2/3, // Sisakan ruang untuk swiper
                   child: ClipRect(
                     child: OverflowBox(
                       alignment: Alignment.center,
@@ -153,78 +198,66 @@ Widget build(BuildContext context) {
                                 height: _cameraController!.value.previewSize!.width,
                                 child: Stack(
                                   children: [
-                                 
+                                    Transform(
+                                      alignment: Alignment.center,
+                                      transform: (_cameraController!.description.lensDirection == CameraLensDirection.front
+                                          ? (Matrix4.identity()..scale(-1.0, 1.0)) // Membalik untuk kamera depan
+                                          : Matrix4.identity()),
+                                      child: CameraPreviewWidget(
+                                        cameraController: _cameraController!,
+                                        showCircleOverlay: false,
+                                      ),
+                                    ),
 
-                             Transform(
-  alignment: Alignment.center,
-  transform: (_cameraController!.description.lensDirection == CameraLensDirection.front
-      ? (Matrix4.identity()..scale(-1.0, 1.0)) // Membalik secara horizontal untuk kamera depan
-      : Matrix4.identity()), // Tidak ada transformasi untuk kamera belakang
-  child: CameraPreviewWidget(
-    cameraController: _cameraController!,
-    showCircleOverlay: false,
-  ),
-),
+                                    // Kacamata
+                                    ..._faces.map((face) {
+                                      final leftEye = face.landmarks[FaceLandmarkType.leftEye];
+                                      final rightEye = face.landmarks[FaceLandmarkType.rightEye];
 
-                                                                        // Kacamata
-..._faces.map((face) {
-  final leftEye = face.landmarks[FaceLandmarkType.leftEye];
-  final rightEye = face.landmarks[FaceLandmarkType.rightEye];
+                                      if (leftEye != null && rightEye != null && kacamataAssets.isNotEmpty) {
+                                        final eyeLeftPosition = Point<double>(
+                                          leftEye.position.x.toDouble(),
+                                          leftEye.position.y.toDouble(),
+                                        );
+                                        final eyeRightPosition = Point<double>(
+                                          rightEye.position.x.toDouble(),
+                                          rightEye.position.y.toDouble(),
+                                        );
 
-  if (leftEye != null && rightEye != null) {
-    final previewWidth = MediaQuery.of(context).size.width;
+                                        // Hitung posisi rata-rata antara kedua mata
+                                        var centerX = (eyeLeftPosition.x + eyeRightPosition.x) / 2;
+                                        var centerY = (eyeLeftPosition.y + eyeRightPosition.y) / 2;
 
-    final eyeLeftPosition = Point<double>(
-      leftEye.position.x.toDouble(),
-      leftEye.position.y.toDouble(),
-    );
-    final eyeRightPosition = Point<double>(
-      rightEye.position.x.toDouble(),
-      rightEye.position.y.toDouble(),
-    );
+                                        // Hitung jarak antara kedua mata
+                                        double eyeDistance = (eyeRightPosition.x - eyeLeftPosition.x).abs();
+                                        double width = eyeDistance * 2.2; // Skala yang lebih besar untuk menyesuaikan dengan bingkai kacamata
+                                        double height = width / 2; // Aspek rasio default kacamata (sesuaikan jika berbeda)
 
-    // Hitung posisi rata-rata antara kedua mata
-    var centerX = (eyeLeftPosition.x + eyeRightPosition.x) / 2;
-    var centerY = (eyeLeftPosition.y + eyeRightPosition.y) / 2;
+                                        double dx = eyeRightPosition.x - eyeLeftPosition.x;
+                                        double dy = eyeRightPosition.y - eyeLeftPosition.y;
+                                        double angle = atan2(dy, dx);
 
-    // Hitung jarak antara kedua mata
-    double eyeDistance = (eyeRightPosition.x - eyeLeftPosition.x).abs();
-    
-    // Tentukan ukuran kacamata dengan penyesuaian
-    double width = eyeDistance * 2 ; // Lebar kacamata
-    double height = eyeDistance ; // Tinggi kacamata
-
-    // Hitung sudut rotasi kacamata berdasarkan posisi kedua mata
-    double dx = eyeRightPosition.x - eyeLeftPosition.x;
-    double dy = eyeRightPosition.y - eyeLeftPosition.y;
-    double angle = atan2(dy, dx);
-
-    return Stack(
-      children: [
-        Positioned(
-          left: centerX - (width / 2), // Posisi horizontal disesuaikan
-          top: centerY - (height / 2), // Posisi vertikal
-          child: Transform.rotate(
-            angle: angle, // Rotasi sesuai sudut antara kedua mata
-            child: Image.asset(
-              'assets/kacamata/square.png',
-              width: width,
-              height: height,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                print('Error loading image: $error');
-                return Text('Error loading image');
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  } else {
-    return SizedBox();
-  }
-}).toList()
-
+                                        return Positioned(
+                                          left: centerX - (width / 2),
+                                          top: centerY - (height / 2),
+                                          child: Transform.rotate(
+                                            angle: angle,
+                                            child: Image.network(
+                                              kacamataAssets[selectedGlassesIndex],
+                                              width: width,
+                                              height: height,
+                                              fit: BoxFit.contain, // Menjaga aspek rasio gambar
+                                              errorBuilder: (context, error, stackTrace) {
+                                                print('Error loading image: $error');
+                                                return Text('Error loading image');
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        return SizedBox(); // Tampilkan widget kosong jika tidak ada landmark atau data
+                                      }
+                                    }).toList(),
                                   ],
                                 ),
                               )
@@ -234,98 +267,68 @@ Widget build(BuildContext context) {
                   ),
                 ),
               ),
-              // Area kosong di bawah video untuk menampilkan koordinat
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ListView(
-                  children: _faces.map((face) {
-                    final leftEye = face.landmarks[FaceLandmarkType.leftEye];
-                    final rightEye = face.landmarks[FaceLandmarkType.rightEye];
-
-                    if (leftEye != null && rightEye != null) {
-                      final eyeLeftPosition = Point<double>(
-                        leftEye.position.x.toDouble(),
-                        leftEye.position.y.toDouble(),
-                      );
-                      final eyeRightPosition = Point<double>(
-                        rightEye.position.x.toDouble(),
-                        rightEye.position.y.toDouble(),
-                      );
-
-                      // Hitung informasi tambahan
-                      var centerX = (eyeLeftPosition.x + eyeRightPosition.x) / 2;
-                      var centerY = (eyeLeftPosition.y + eyeRightPosition.y) / 2;
-
-                      double eyeDistance = sqrt(
-                        pow(eyeRightPosition.x - eyeLeftPosition.x, 2) +
-                        pow(eyeRightPosition.y - eyeLeftPosition.y, 2),
-                      );
-
-                      double width = eyeDistance + eyeDistance; // Panjang kacamata
-                      double height = eyeDistance; // Tinggi kacamata
-
-                      double dx = eyeRightPosition.x - eyeLeftPosition.x;
-                      double dy = eyeRightPosition.y - eyeLeftPosition.y;
-                      double angle = atan2(dy, dx) * (180 / pi); // Sudut dalam derajat
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Informasi Deteksi:',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Mata Kiri: (${eyeLeftPosition.x.toStringAsFixed(2)}, ${eyeLeftPosition.y.toStringAsFixed(2)})',
-                            style: TextStyle(fontSize: 16, color: Colors.red),
-                          ),
-                          Text(
-                            'Mata Kanan: (${eyeRightPosition.x.toStringAsFixed(2)}, ${eyeRightPosition.y.toStringAsFixed(2)})',
-                            style: TextStyle(fontSize: 16, color: Colors.blue),
-                          ),
-                          Text(
-                            'Titik Tengah Kacamata: (${centerX.toStringAsFixed(2)}, ${centerY.toStringAsFixed(2)})',
-                            style: TextStyle(fontSize: 16, color: Colors.green),
-                          ),
-                          Text(
-                            'Panjang Kacamata: ${width.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 16, color: Colors.purple),
-                          ),
-                          Text(
-                            'Tinggi Kacamata: ${height.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 16, color: Colors.orange),
-                          ),
-                          Text(
-                            'Sudut Rotasi: ${angle.toStringAsFixed(2)}°',
-                            style: TextStyle(fontSize: 16, color: Colors.brown),
-                          ),
-                          Divider(),
-                        ],
-                      );
-                    } else {
-                      return Text(
-                        'Landmark mata tidak terdeteksi.',
-                        style: TextStyle(color: Colors.grey),
-                      );
-                    }
-                  }).toList(),
+// Swiper di atas preview
+Positioned(
+  bottom: 0, // Letakkan di bagian bawah
+  left: 0,
+  right: 0,
+  child: isLoading
+      ? Center(child: CircularProgressIndicator())
+      : Container(
+          height: 120, // Tinggi kontainer swiper
+          margin: EdgeInsets.symmetric(vertical: 0), // Mengurangi margin untuk memberikan lebih banyak ruang
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)), // Menambahkan sudut melengkung pada bagian atas
+          ),
+          child: Swiper(
+            itemCount: kacamataAssets.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                width: 50, // Atur lebar kontainer lingkaran yang lebih besar
+                height: 50, // Atur tinggi kontainer lingkaran yang lebih besar
+               padding: EdgeInsets.fromLTRB(50, 10, 50, 10),// Menambahkan padding agar gambar tidak menyentuh tepi
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle, // Mengatur bentuk menjadi lingkaran
+                  color: Colors.white, // Atur warna latar belakang
                 ),
-              ),
-            ),
+                child: ClipOval( // Menggunakan ClipOval untuk memastikan gambar berada di dalam lingkaran
+                  child: Image.network(
+                    kacamataAssets[index],
+                    fit: BoxFit.contain, // Mengatur gambar agar memenuhi area lingkaran
+                    errorBuilder: (context, error, stackTrace) {
+                      print('Error loading image: $error');
+                      return Text('Error loading image');
+                    },
+                  ),
+                ),
+              );
+            },
+            viewportFraction: 0.5, // Mengurangi viewportFraction untuk menghindari gambar berdempetan
+            scale: 0.85, // Menyesuaikan skala untuk memberikan jarak yang lebih baik antar gambar
+            onIndexChanged: (index) {
+              setState(() {
+                selectedGlassesIndex = index; // Perbarui kacamata yang dipilih
+              });
+            },
+          ),
+        ),
+),
 
-          ],
-        )
-      : const Center(child: CircularProgressIndicator()),
-    );
-  }
+
+            ],
+          )
+        : Center(child: CircularProgressIndicator()), // Menampilkan loading saat kamera belum siap
+  );
+}
 
 
 
   @override
   void dispose() {
     _faceDetector.close();
+    _cameraController?.stopImageStream(); // Tambahkan ini untuk menghentikan stream
     _cameraController?.dispose();
     super.dispose();
   }
+
 }
