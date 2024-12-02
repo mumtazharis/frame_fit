@@ -1,45 +1,131 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api_config.dart';
 
-class BerandaPage extends StatelessWidget {
+class BerandaPage extends StatefulWidget {
+  @override
+  _BerandaPageState createState() => _BerandaPageState();
+}
+
+class _BerandaPageState extends State<BerandaPage> {
+  List<Glasses> glassesList = [];
+  String selectedCategory = 'Semua';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchGlasses(); // Ambil semua data kacamata di awal
+  }
+
+  Future<void> fetchGlasses({String gender = ''}) async {
+    String url = '${ApiConfig.baseUrl}/api/kacamata'; // URL backend
+
+    // Tambah filter gender jika ada
+    if (gender == 'male') {
+      url += '?gender=male';
+    } else if (gender == 'female') {
+      url += '?gender=female';
+    }
+
+    try {
+      final token = await getToken();
+
+      if (token == null) {
+        print('Token tidak ditemukan');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token', // Kirim token JWT dalam header
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+        setState(() {
+          glassesList = data.map((item) => Glasses.fromJson(item)).toList();
+        });
+      } else {
+        print('Gagal memuat data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
+
+  void onCategorySelected(String category) {
+    setState(() {
+      selectedCategory = category;
+
+      if (category == 'Koleksi Pria') {
+        fetchGlasses(gender: 'male');
+      } else if (category == 'Koleksi Wanita') {
+        fetchGlasses(gender: 'female');
+      } else {
+        fetchGlasses();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea( // Mencegah konten tertutup status bar
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header dengan padding lebih baik
+            // Header kategori
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildCategoryTab('Semua', isSelected: true),
-                  _buildCategoryTab('Koleksi Pria'),
-                  _buildCategoryTab('Koleksi Wanita'),
+                  GestureDetector(
+                    onTap: () => onCategorySelected('Semua'),
+                    child: _buildCategoryTab('Semua', isSelected: selectedCategory == 'Semua'),
+                  ),
+                  GestureDetector(
+                    onTap: () => onCategorySelected('Koleksi Pria'),
+                    child: _buildCategoryTab('Koleksi Pria', isSelected: selectedCategory == 'Koleksi Pria'),
+                  ),
+                  GestureDetector(
+                    onTap: () => onCategorySelected('Koleksi Wanita'),
+                    child: _buildCategoryTab('Koleksi Wanita', isSelected: selectedCategory == 'Koleksi Wanita'),
+                  ),
                 ],
               ),
             ),
             Divider(thickness: 1, color: Colors.grey.shade300),
 
-            // Daftar produk kacamata
+            // GridView produk kacamata
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // Menampilkan 2 kolom
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.75, // Proporsi elemen dalam grid
-                  ),
-                  itemCount: glassesList.length,
-                  itemBuilder: (context, index) {
-                    final glasses = glassesList[index];
-                    return _buildProductCard(glasses);
-                  },
-                ),
+                child: glassesList.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 0.75,
+                        ),
+                        itemCount: glassesList.length,
+                        itemBuilder: (context, index) {
+                          final glasses = glassesList[index];
+                          return _buildProductCard(glasses);
+                        },
+                      ),
               ),
             ),
           ],
@@ -50,9 +136,8 @@ class BerandaPage extends StatelessWidget {
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
-        currentIndex: 0, // Tab aktif
+        currentIndex: 0,
         onTap: (index) {
-          // Navigasi ke tab berdasarkan index
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/beranda');
@@ -71,15 +156,13 @@ class BerandaPage extends StatelessWidget {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code_scanner), label: 'Scan Wajah'),
+          BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner), label: 'Scan Wajah'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );
   }
 
-  // Widget untuk tab kategori koleksi
   Widget _buildCategoryTab(String label, {bool isSelected = false}) {
     return Column(
       children: [
@@ -102,41 +185,55 @@ class BerandaPage extends StatelessWidget {
     );
   }
 
-  // Widget untuk kartu produk kacamata
   Widget _buildProductCard(Glasses glasses) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              color: Colors.grey.shade200,
-              image: DecorationImage(
-                image: AssetImage(glasses.imagePath),
-                fit: BoxFit.cover,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  image: DecorationImage(
+                    image: NetworkImage(glasses.imagePath), // URL gambar
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 5),
+            Text(
+              glasses.name,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 3),
+            Text(
+              glasses.category,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        const SizedBox(height: 5),
-        Text(
-          glasses.name,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 3),
-        Text(
-          glasses.category,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-          textAlign: TextAlign.center,
-        ),
-      ],
+      ),
     );
   }
 }
 
-// Model produk kacamata
 class Glasses {
   final String name;
   final String category;
@@ -147,28 +244,12 @@ class Glasses {
     required this.category,
     required this.imagePath,
   });
-}
 
-// Daftar produk kacamata
-final List<Glasses> glassesList = [
-  Glasses(
-    name: 'Aviator Glasses',
-    category: 'Pria',
-    imagePath: 'assets/images/aviator.jpg',
-  ),
-  Glasses(
-    name: 'Ray-Ban Wayfarer Glasses',
-    category: 'Pria',
-    imagePath: 'assets/images/wayfarer.jpg',
-  ),
-  Glasses(
-    name: 'Hexagonal Pink Glasses',
-    category: 'Wanita',
-    imagePath: 'assets/images/hexagonal.jpg',
-  ),
-  Glasses(
-    name: 'Black Bold Square Glasses',
-    category: 'Wanita',
-    imagePath: 'assets/images/square.jpg',
-  ),
-];
+  factory Glasses.fromJson(Map<String, dynamic> json) {
+    return Glasses(
+      name: json['filename'],
+      category: json['category'],
+      imagePath: json['url'], // URL gambar dari API
+    );
+  }
+}

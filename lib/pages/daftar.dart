@@ -1,8 +1,11 @@
 import 'dart:convert'; // Untuk jsonEncode
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import 'daftar_verifikasi.dart'; // Pastikan path file benar
+import 'ketentuan.dart'; // Pastikan path file benar
+import 'kebijakan.dart'; // Pastikan path file benar
 
 class DaftarPage extends StatefulWidget {
   @override
@@ -44,8 +47,9 @@ class _DaftarPageState extends State<DaftarPage> {
         );
       } else {
         final Map<String, dynamic> responseJson = jsonDecode(response.body);
-        String errorMessage = responseJson['message'] ?? 'Gagal mengirim OTP. Coba lagi nanti.';
-        
+        String errorMessage =
+            responseJson['message'] ?? 'Gagal mengirim OTP. Coba lagi nanti.';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
@@ -113,6 +117,7 @@ class _DaftarPageState extends State<DaftarPage> {
                           Container(
                             width: 360,
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Checkbox(
                                   value: _isChecked,
@@ -124,9 +129,53 @@ class _DaftarPageState extends State<DaftarPage> {
                                   activeColor: Color.fromARGB(255, 33, 72, 243),
                                 ),
                                 Expanded(
-                                  child: Text(
-                                    'Dengan membuat akun, Anda menyetujui Ketentuan Penggunaan dan Kebijakan Privasi.',
-                                    style: TextStyle(fontSize: 12),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      text: 'Dengan membuat akun, Anda menyetujui ',
+                                      style: TextStyle(fontSize: 12, color: Colors.black),
+                                      children: [
+                                        TextSpan(
+                                          text: 'Ketentuan Penggunaan',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.blue,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => KetentuanPage(),
+                                                ),
+                                              );
+                                            },
+                                        ),
+                                        TextSpan(
+                                          text: ' dan ',
+                                        ),
+                                        TextSpan(
+                                          text: 'Kebijakan Privasi',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.blue,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => KebijakanPage(),
+                                                ),
+                                              );
+                                            },
+                                        ),
+                                        TextSpan(
+                                          text: '.',
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
