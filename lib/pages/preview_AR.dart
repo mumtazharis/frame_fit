@@ -26,6 +26,7 @@ class _ARPreviewPageState extends State<ARPreviewPage> {
   List<String> kacamataAssets = []; // Daftar URL kacamata dari API
   int selectedGlassesIndex = 0; // Simpan indeks kacamata yang dipilih
   bool isLoading = true; // Indikator pemuatan data kacamata
+  SwiperController _swiperController = SwiperController();
 
   @override
   void initState() {
@@ -188,8 +189,8 @@ Widget build(BuildContext context) {
                   context: context,
                   builder: (context) {
                     return DraggableScrollableSheet(
-                      initialChildSize: 0.5,
-                      minChildSize: 0.3,
+                      initialChildSize: 1.0,
+                      minChildSize: 0.9,
                       maxChildSize: 1.0,
                       builder: (context, scrollController) {
                         return Container(
@@ -197,6 +198,7 @@ Widget build(BuildContext context) {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+                            
                           ),
                           child: Column(
                             children: [
@@ -211,20 +213,34 @@ Widget build(BuildContext context) {
                                   itemCount: kacamataAssets.length,
                                   itemBuilder: (context, index) {
                                     return Padding(
-                                      padding: const EdgeInsets.all(8.0), // Mengurangi padding agar sesuai
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle, // Membuat latar belakang lingkaran
-                                          color: Colors.white, // Warna latar belakang
-                                        ),
-                                        child: ClipOval(
-                                          child: Image.network(
-                                            kacamataAssets[index],
-                                            fit: BoxFit.contain, // Menjaga aspek rasio gambar
-                                            errorBuilder: (context, error, stackTrace) {
-                                              print('Error loading image: $error');
-                                              return Text('Error loading image');
-                                            },
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          // Perbarui selectedGlassesIndex dan tutup modal
+                                          setState(() {
+                                            selectedGlassesIndex = index;
+                                          });
+                                          _swiperController.move(index); // Pindahkan swiper ke index yang dipilih
+                                          Navigator.pop(context); // Menutup modal sheet
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.white,
+                                            border: Border.all(
+                                              color: Colors.black,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: ClipOval(
+                                            child: Image.network(
+                                              kacamataAssets[index],
+                                              fit: BoxFit.contain,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                print('Error loading image: $error');
+                                                return Text('Error loading image');
+                                              },
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -347,59 +363,65 @@ Widget build(BuildContext context) {
 
                 // Swiper
                 Positioned(
-                  top: screenSize.height * 0.8 - 60, // Setengah swiper di atas kamera
-                  left: 0,
-                  right: 0,
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                height: 120, // Tinggi total Swiper
-                                child: Swiper(
-                                  itemCount: kacamataAssets.length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return Container(
-                                      padding: EdgeInsets.fromLTRB(30, 10, 30, 10), // Padding spesifik
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle, // Membuat gambar berbentuk lingkaran
-                                        color: const Color.fromARGB(255, 255, 255, 255), // Latar belakang lingkaran
-                                      ),
-                                      child: ClipOval(
-                                        child: Image.network(
-                                          kacamataAssets[index],
-                                          fit: BoxFit.contain, // Menjaga aspek rasio gambar
-                                          errorBuilder: (context, error, stackTrace) {
-                                            print('Error loading image: $error');
-                                            return Text('Error loading image');
-                                          },
+                    top: screenSize.height * 0.8 - 60,
+                    left: 0,
+                    right: 0,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: isLoading
+                          ? Center(child: CircularProgressIndicator())
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  height: 120,
+                                  child: Swiper(
+                                    controller: _swiperController, // Menggunakan controller yang sudah didefinisikan
+                                    index: selectedGlassesIndex,
+                                    itemCount: kacamataAssets.length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      return Container(
+                                        padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color: Colors.black,
+                                            width: 1.0,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  viewportFraction: 0.4, // Ukuran item Swiper relatif terhadap layar
-                                  scale: 0.85, // Skala item di tengah
-                                  loop: false,
-                                  onIndexChanged: (index) {
-                                    setState(() {
-                                      selectedGlassesIndex = index;
-                                    });
-                                  },
+                                        child: ClipOval(
+                                          child: Image.network(
+                                            kacamataAssets[index],
+                                            fit: BoxFit.contain,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              print('Error loading image: $error');
+                                              return Text('Error loading image');
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    viewportFraction: 0.4,
+                                    scale: 0.85,
+                                    loop: false,
+                                    onIndexChanged: (index) {
+                                      setState(() {
+                                        selectedGlassesIndex = index;
+                                      });
+                                    },
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 20.0),
-                                child: Icon(
-                                  Icons.keyboard_arrow_up,
-                                  size: 40,
-                                  color: Colors.grey,
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 20.0),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_up,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                   ),
                 ),
               ],
