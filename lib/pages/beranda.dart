@@ -22,7 +22,7 @@ class _BerandaPageState extends State<BerandaPage> {
   Future<void> fetchGlasses({String gender = ''}) async {
     String url = '${ApiConfig.baseUrl}/api/kacamata'; // URL backend
 
-    // Tambah filter gender jika ada
+    // Tambahkan filter gender jika kategori selain 'Semua' dipilih
     if (gender == 'male') {
       url += '?gender=male';
     } else if (gender == 'female') {
@@ -67,11 +67,11 @@ class _BerandaPageState extends State<BerandaPage> {
       selectedCategory = category;
 
       if (category == 'Koleksi Pria') {
-        fetchGlasses(gender: 'male');
+        fetchGlasses(gender: 'male'); // Filter untuk pria
       } else if (category == 'Koleksi Wanita') {
-        fetchGlasses(gender: 'female');
+        fetchGlasses(gender: 'female'); // Filter untuk wanita
       } else {
-        fetchGlasses();
+        fetchGlasses(gender: ''); // Ambil semua data
       }
     });
   }
@@ -206,11 +206,13 @@ class _BerandaPageState extends State<BerandaPage> {
           children: [
             Expanded(
               child: Container(
+                height: 150,
+                width: 150,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
                   image: DecorationImage(
-                    image: NetworkImage(glasses.imagePath), // URL gambar
-                    fit: BoxFit.cover,
+                    image: NetworkImage(glasses.imagePath),
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
@@ -247,9 +249,9 @@ class Glasses {
 
   factory Glasses.fromJson(Map<String, dynamic> json) {
     return Glasses(
-      name: json['filename'],
-      category: json['category'],
-      imagePath: json['url'], // URL gambar dari API
+      name: json['model'], // Ganti ke 'model' sesuai respons API
+      category: json['bentuk'], // Ganti ke 'bentuk' sesuai respons API
+      imagePath: json['foto'], // Properti untuk URL gambar
     );
   }
 }
