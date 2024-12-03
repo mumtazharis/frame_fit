@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frame_fit/pages/loading_screen.dart';
 import 'package:frame_fit/providers/masuk_provider.dart'; // Import provider
-
+import 'navbar.dart';
 class MasukAkunPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<MasukAkunPage> createState() => _MasukAkunPageState();
@@ -28,7 +28,7 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => LoadingScreen(nextPage: 'BerandaPage'),
+          builder: (context) => NavbarPage(),
         ),
       );
     } else if (updatedAuthState.errorMessage != null) {
