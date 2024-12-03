@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frame_fit/pages/masuk_akun.dart';
-import 'package:frame_fit/pages/beranda.dart';
+import 'package:frame_fit/pages/beranda_page.dart';
 
 class LoadingScreen extends StatefulWidget {
   final String nextPage;  // pastikan ada deklarasi parameter nextPage di sini

@@ -21,7 +21,7 @@ class EditProfilePage extends StatelessWidget {
           ),
         ),
         actions: [
-          // Tombol Save diaktifkan
+          // Tombol Simpan diaktifkan
           TextButton(
             onPressed: null,
             child: const Text(
@@ -81,34 +81,6 @@ class EditProfilePage extends StatelessWidget {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
-        backgroundColor: Colors.white,
-        currentIndex: 3,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/beranda');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/cari');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/camera');
-              break;
-            case 3:
-              Navigator.pushNamed(context, '/profil');
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner), label: 'Scan Wajah'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
       ),
     );
   }

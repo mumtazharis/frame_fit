@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frame_fit/pages/loading_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'beranda.dart';
 import '../config/api_config.dart';
+import 'package:frame_fit/pages/navbar.dart';
 
 class MasukAkunPage extends StatefulWidget {
   @override
@@ -51,7 +50,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => LoadingScreen(nextPage: 'BerandaPage'),
+          builder: (context) => NavbarPage(),
         ),
       );
     } else {

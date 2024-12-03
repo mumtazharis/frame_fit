@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'edit_profil.dart';
+import 'package:frame_fit/pages/aboutUs_page.dart';
+import 'package:frame_fit/pages/contactUs_page.dart';
+import 'package:frame_fit/pages/ubahPassword_page.dart';
+import 'editProfil_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -40,9 +43,7 @@ class ProfilePage extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const EditProfilePage(),
-                      ),
+                      MaterialPageRoute(builder: (context) => EditProfilePage()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -71,23 +72,33 @@ class ProfilePage extends StatelessWidget {
               // List Menu
               ListTile(
                 leading: const Icon(Icons.lock),
-                title: const Text('Ganti Password'),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(Icons.subscriptions),
-                title: const Text('Langganan'),
-                onTap: () {},
+                title: const Text('Ubah Password'),
+                onTap: () {
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UbahPasswordPage()),
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.support_agent),
                 title: const Text('Kontak Kami'),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ContactUsPage()),
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.info),
                 title: const Text('Tentang Kami'),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AboutUsPage()),
+                  );
+                },
               ),
 
               // Spacer untuk mendorong konten agar tidak terlalu atas
@@ -95,34 +106,6 @@ class ProfilePage extends StatelessWidget {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
-        backgroundColor: Colors.white,
-        currentIndex: 3,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/beranda');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/cari');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/camera');
-              break;
-            case 3:
-              Navigator.pushNamed(context, '/profil');
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Cari'),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner), label: 'Scan Wajah'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
       ),
     );
   }
