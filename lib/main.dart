@@ -6,9 +6,10 @@ import 'pages/home_page.dart';
 import 'pages/camera_page.dart';
 import 'pages/daftar.dart';
 import 'pages/masuk_akun.dart';
-import 'pages/profil.dart';
-import 'pages/beranda.dart';
-import 'pages/cari.dart';
+import 'pages/profil_page.dart';
+import 'pages/beranda_page.dart';
+import 'pages/favorit_page.dart';
+import 'pages/navbar.dart';
 import '../config/api_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,21 +52,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: isTokenValid ? '/beranda' : '/', // Sesuaikan rute awal
+      initialRoute: isTokenValid ? '/navbar' : '/',
       routes: {
         '/': (context) => HomePage(),
         '/camera': (context) => CameraPage(), // Kamera tanpa validasi token
         '/daftar': (context) => DaftarPage(),
         '/masuk_akun': (context) => MasukAkunPage(),
+        '/navbar': (context) => TokenValidationWrapper(
+              child: NavbarPage()
+            ),
         '/profil': (context) => TokenValidationWrapper(
               child: ProfilePage(),
             ),
         '/beranda': (context) => TokenValidationWrapper(
               child: BerandaPage(),
             ),
-        '/cari': (context) => TokenValidationWrapper(
-              child: CariPage(),
+        '/favorit': (context) => TokenValidationWrapper(
+              child: FavoritePage(favoriteGlassesList: [],),
             ),
+        
       },
     );
   }

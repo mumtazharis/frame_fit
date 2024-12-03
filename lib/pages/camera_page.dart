@@ -15,6 +15,7 @@ class CameraPage extends ConsumerWidget {
     double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Padding(
