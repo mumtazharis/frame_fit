@@ -10,6 +10,7 @@ import 'pages/profil.dart';
 import 'pages/beranda.dart';
 import 'pages/cari.dart';
 import '../config/api_config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   // Memastikan WidgetsFlutterBinding diinisialisasi
@@ -35,7 +36,11 @@ void main() async {
   }
 
   // Jalankan aplikasi
-  runApp(MyApp(isTokenValid: isTokenValid));
+  runApp(
+    ProviderScope(
+      child: MyApp(isTokenValid: isTokenValid),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -49,12 +54,18 @@ class MyApp extends StatelessWidget {
       initialRoute: isTokenValid ? '/beranda' : '/', // Sesuaikan rute awal
       routes: {
         '/': (context) => HomePage(),
-        '/camera': (context) => CameraPage(),
+        '/camera': (context) => CameraPage(), // Kamera tanpa validasi token
         '/daftar': (context) => DaftarPage(),
         '/masuk_akun': (context) => MasukAkunPage(),
-        '/profil': (context) => ProfilePage(),
-        '/beranda': (context) => BerandaPage(),
-        '/cari': (context) => CariPage(),
+        '/profil': (context) => TokenValidationWrapper(
+              child: ProfilePage(),
+            ),
+        '/beranda': (context) => TokenValidationWrapper(
+              child: BerandaPage(),
+            ),
+        '/cari': (context) => TokenValidationWrapper(
+              child: CariPage(),
+            ),
       },
     );
   }
@@ -98,5 +109,49 @@ Future<String?> refreshAccessToken(String refreshToken) async {
   } catch (e) {
     print('Error saat merefresh token: $e');
     return null;
+  }
+}
+
+// Widget untuk memvalidasi token
+class TokenValidationWrapper extends StatefulWidget {
+  final Widget child;
+
+  TokenValidationWrapper({required this.child});
+
+  @override
+  _TokenValidationWrapperState createState() => _TokenValidationWrapperState();
+}
+
+class _TokenValidationWrapperState extends State<TokenValidationWrapper> {
+  Future<bool>? _tokenFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _tokenFuture = _checkToken(); // Panggil validasi token hanya sekali
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _tokenFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator()); // Tampilkan loading
+        } else if (snapshot.hasError || !(snapshot.data ?? false)) {
+          return HomePage(); // Jika token tidak valid, arahkan ke halaman awal
+        }
+        return widget.child; // Tampilkan halaman jika token valid
+      },
+    );
+  }
+
+  Future<bool> _checkToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? accessToken = prefs.getString('access_token');
+    if (accessToken != null) {
+      return await isValidToken(accessToken); // Validasi token
+    }
+    return false;
   }
 }

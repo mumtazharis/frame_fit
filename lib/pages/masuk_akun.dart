@@ -1,69 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frame_fit/pages/loading_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'beranda.dart';
-import '../config/api_config.dart';
+import 'package:frame_fit/providers/masuk_provider.dart'; // Import provider
 
-class MasukAkunPage extends StatefulWidget {
+class MasukAkunPage extends ConsumerStatefulWidget {
   @override
-  _MasukAkunPageState createState() => _MasukAkunPageState();
+  ConsumerState<MasukAkunPage> createState() => _MasukAkunPageState();
 }
 
-class _MasukAkunPageState extends State<MasukAkunPage> {
+class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-  String? _errorMessage;
 
   Future<void> _login() async {
-    final String email = _emailController.text;
-    final String password = _passwordController.text;
+    // Panggil fungsi login dari AuthNotifier
+    await ref.read(authProvider.notifier).login(
+          _emailController.text,
+          _passwordController.text,
+        );
 
-    if (email.isEmpty || password.isEmpty) {
-      setState(() {
-        _errorMessage = 'Email dan password tidak boleh kosong.';
-      });
-      return;
-    }
+    // Ambil state terbaru setelah login
+    final updatedAuthState = ref.read(authProvider);
 
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/api/users/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'username': email,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseBody = json.decode(response.body);
-      final String accessToken = responseBody['access_token'];
-      final String refreshToken = responseBody['refresh_token']; // Tambahkan refresh token
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('access_token', accessToken);
-      await prefs.setString('refresh_token', refreshToken);
-
+    // Lakukan navigasi jika token berhasil diperoleh
+    if (updatedAuthState.accessToken != null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => LoadingScreen(nextPage: 'BerandaPage'),
         ),
       );
-    } else {
-      setState(() {
-        _errorMessage = 'Email atau password salah.';
-      });
+    } else if (updatedAuthState.errorMessage != null) {
+      // Jika ada error, tampilkan pesan error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(updatedAuthState.errorMessage!)),
+      );
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SafeArea(
@@ -79,17 +58,15 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start, // Posisi elemen ke atas
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          // Menggeser logo lebih kebawah
-                          SizedBox(height: 90), // Menambah jarak lebih besar dari atas
+                          SizedBox(height: 90),
                           Image.asset(
                             'assets/images/logo_pt.png',
                             width: 175,
                             height: 175,
                           ),
-                          // Menambah jarak setelah logo
-                          SizedBox(height: 80), // Jarak lebih besar setelah logo
+                          SizedBox(height: 80),
                           Container(
                             width: 350,
                             child: TextField(
@@ -104,7 +81,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 16), // Jarak antar input
+                          SizedBox(height: 16),
                           Container(
                             width: 350,
                             child: TextField(
@@ -129,7 +106,7 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 30), // Jarak sebelum tombol
+                          SizedBox(height: 30),
                           ElevatedButton(
                             onPressed: _login,
                             style: ElevatedButton.styleFrom(
@@ -144,11 +121,11 @@ class _MasukAkunPageState extends State<MasukAkunPage> {
                               style: TextStyle(fontSize: 16, color: Colors.white),
                             ),
                           ),
-                          if (_errorMessage != null)
+                          if (authState.errorMessage != null)
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                _errorMessage!,
+                                authState.errorMessage!,
                                 style: TextStyle(color: Colors.red, fontSize: 14),
                               ),
                             ),

@@ -1,73 +1,38 @@
-import 'dart:convert'; // Untuk jsonEncode
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../config/api_config.dart';
-import 'daftar_verifikasi.dart'; // Pastikan path file benar
-import 'ketentuan.dart'; // Pastikan path file benar
-import 'kebijakan.dart'; // Pastikan path file benar
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/daftar_provider.dart';
+import 'daftar_verifikasi.dart';
+import 'ketentuan.dart';
+import 'kebijakan.dart';
 
-class DaftarPage extends StatefulWidget {
+class DaftarPage extends ConsumerStatefulWidget {
   @override
   _DaftarPageState createState() => _DaftarPageState();
 }
 
-class _DaftarPageState extends State<DaftarPage> {
-  bool _isChecked = false;
+class _DaftarPageState extends ConsumerState<DaftarPage> {
   final TextEditingController _emailController = TextEditingController();
-  String? _errorMessage;
-  bool _isLoading = false; // Tambahkan ini untuk status loading
+  bool _isCheckboxChecked = false;
+  String? _errorText;
 
-  // Fungsi untuk mengirim permintaan OTP
-  Future<void> sendOtp(String email) async {
-    setState(() {
-      _isLoading = true; // Set status loading ke true
-    });
-
-    final String apiUrl = "${ApiConfig.baseUrl}/api/users/sendotp";
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email}),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('OTP telah dikirim ke $email')),
-        );
-
-        // Navigasi ke halaman verifikasi
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DaftarVerifikasi(email: email),
-          ),
-        );
-      } else {
-        final Map<String, dynamic> responseJson = jsonDecode(response.body);
-        String errorMessage =
-            responseJson['message'] ?? 'Gagal mengirim OTP. Coba lagi nanti.';
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
-      }
-    } catch (e) {
-      String errorMessage = 'Kesalahan terjadi saat mengirim OTP: $e';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
-    } finally {
+  void _validateEmail(String value) {
+    if (!value.endsWith('@gmail.com')) {
       setState(() {
-        _isLoading = false; // Set status loading kembali ke false
+        _errorText = 'Email harus diakhiri dengan @gmail.com';
+      });
+    } else {
+      setState(() {
+        _errorText = null;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final authNotifier = ref.read(authProvider.notifier);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SafeArea(
@@ -94,23 +59,15 @@ class _DaftarPageState extends State<DaftarPage> {
                             child: TextField(
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (!value.endsWith('@gmail.com')) {
-                                    _errorMessage = 'Email harus diakhiri dengan @gmail.com';
-                                  } else {
-                                    _errorMessage = null;
-                                  }
-                                });
-                              },
                               decoration: InputDecoration(
                                 labelText: 'Masukkan email Anda untuk daftar atau masuk',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 prefixIcon: Icon(Icons.person),
-                                errorText: _errorMessage,
+                                errorText: _errorText,
                               ),
+                              onChanged: _validateEmail,
                             ),
                           ),
                           SizedBox(height: 16),
@@ -120,13 +77,12 @@ class _DaftarPageState extends State<DaftarPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Checkbox(
-                                  value: _isChecked,
-                                  onChanged: (bool? value) {
+                                  value: _isCheckboxChecked,
+                                  onChanged: (value) {
                                     setState(() {
-                                      _isChecked = value ?? false;
+                                      _isCheckboxChecked = value!;
                                     });
                                   },
-                                  activeColor: Color.fromARGB(255, 33, 72, 243),
                                 ),
                                 Expanded(
                                   child: RichText(
@@ -182,14 +138,22 @@ class _DaftarPageState extends State<DaftarPage> {
                             ),
                           ),
                           SizedBox(height: 16),
-                          _isLoading
-                              ? CircularProgressIndicator() // Tampilkan loading jika sedang memproses
+                          authState.isLoading
+                              ? CircularProgressIndicator()
                               : ElevatedButton(
-                                  onPressed: (_isChecked &&
-                                          _errorMessage == null &&
-                                          _emailController.text.endsWith('@gmail.com'))
-                                      ? () {
-                                          sendOtp(_emailController.text); // Panggil fungsi sendOtp
+                                  onPressed: (_isCheckboxChecked && _errorText == null)
+                                      ? () async {
+                                          await authNotifier.sendOtp(_emailController.text);
+                                          if (authState.errorMessage == null) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => DaftarVerifikasi(
+                                                  email: _emailController.text,
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         }
                                       : null,
                                   style: ElevatedButton.styleFrom(
@@ -204,6 +168,13 @@ class _DaftarPageState extends State<DaftarPage> {
                                     style: TextStyle(fontSize: 16, color: Colors.white),
                                   ),
                                 ),
+                          if (authState.errorMessage != null) ...[
+                            SizedBox(height: 8),
+                            Text(
+                              authState.errorMessage!,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ],
                           SizedBox(height: 30),
                           Row(
                             children: <Widget>[

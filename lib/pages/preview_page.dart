@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/camera_provider.dart';
 import 'preview_AR.dart';
 import 'dart:io';
 
-class ImagePreviewPage extends StatelessWidget {
-  final String imagePath;
-  final int selectedCameraIndex;
-  // final CameraController cameraController;
-  final Map<String, dynamic>? predictionResult;
-
-  const ImagePreviewPage({
-    Key? key,
-    required this.imagePath,
-    required this.selectedCameraIndex,
-    // required this.cameraController,
-    required this.predictionResult,
-  }) : super(key: key);
+class ImagePreviewPage extends ConsumerWidget {
+  const ImagePreviewPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(cameraProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preview Image'),
@@ -26,28 +19,33 @@ class ImagePreviewPage extends StatelessWidget {
         children: [
           Expanded(
             child: Center(
-              child: Image.file(File(imagePath)),
+              child: state.imagePath != null
+                  ? Image.file(File(state.imagePath!))
+                  : const Text('No Image Selected'),
             ),
           ),
-          if (predictionResult != null) 
+          if (state.predictionResult != null)
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: predictionResult!.containsKey('error')
-                  // Tampilkan pesan error jika terdapat kunci 'error' dalam predictionResult
+              child: state.predictionResult!.containsKey('error')
                   ? Text(
-                      'Error: ${predictionResult!['error']}',
-                      style: const TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.bold),
+                      'Error: ${state.predictionResult!['error']}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
                     )
-                  // Jika tidak ada error, tampilkan hasil prediksi dan confidence
                   : Column(
                       children: [
                         Text(
-                          'Prediction: ${predictionResult!['predicted_label']}',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          'Prediction: ${state.predictionResult!['predicted_label']}',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Confidence: ${predictionResult!['confidence']}%',
+                          'Confidence: ${state.predictionResult!['confidence']}%',
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],
@@ -57,16 +55,18 @@ class ImagePreviewPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ARPreviewPage(
-                      selectedCameraIndex: selectedCameraIndex,
-                      
-                      bentuk_wajah: predictionResult!['predicted_label'],
+                if (state.predictionResult != null &&
+                    state.predictionResult!.containsKey('predicted_label')) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ARPreviewPage(
+                        selectedCameraIndex: state.selectedCameraIndex,
+                        bentuk_wajah: state.predictionResult!['predicted_label'],
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               },
               child: const Text('Preview AR'),
             ),
@@ -75,5 +75,4 @@ class ImagePreviewPage extends StatelessWidget {
       ),
     );
   }
-  
 }

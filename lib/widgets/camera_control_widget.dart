@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CameraControlWidget extends StatelessWidget {
-  final Function onSwitchCamera;
-  final Function onTakePicture;
-  final Function onSelectImage; // Fungsi untuk memilih gambar
+  final VoidCallback onSwitchCamera;
+  final VoidCallback onTakePicture;
+  final VoidCallback onSelectImage;
 
   const CameraControlWidget({
     Key? key,
