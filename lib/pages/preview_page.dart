@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/camera_provider.dart';
+import '../providers/AR_provider.dart';
 import 'preview_AR.dart';
 import 'dart:io';
 
@@ -10,7 +11,9 @@ class ImagePreviewPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(cameraProvider);
+    final arNotifier = ref.watch(ARProvider.notifier);
 
+  
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preview Image'),
@@ -57,12 +60,14 @@ class ImagePreviewPage extends ConsumerWidget {
               onPressed: () {
                 if (state.predictionResult != null &&
                     state.predictionResult!.containsKey('predicted_label')) {
+                        arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
+                        arNotifier.updateBentukWajah(state.predictionResult!['predicted_label']);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ARPreviewPage(
-                        selectedCameraIndex: state.selectedCameraIndex,
-                        bentuk_wajah: state.predictionResult!['predicted_label'],
+                        // selectedCameraIndex: state.selectedCameraIndex,
+                        // bentuk_wajah: state.predictionResult!['predicted_label'],
                       ),
                     ),
                   );
