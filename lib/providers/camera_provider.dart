@@ -131,21 +131,26 @@ Future<void> takePicture(BuildContext context) async {
 
   Future<void> goToPreviewPage(BuildContext context) async {
     if (state.imagePath != null) {
-      final result = await await Navigator.push(
+      await _resetBrightness();
+      await state.cameraController?.setFlashMode(FlashMode.off);
+      state = state.copyWith(isFlashOn: false);
+
+      await Navigator.push(
+  
         context,
         MaterialPageRoute(
           builder: (context) => const ImagePreviewPage(),
         ),
       );
 
-
-      if (result != null && result is int) {
-        state = state.copyWith(selectedCameraIndex: result);
+      if (state.cameras![state.selectedCameraIndex].lensDirection == CameraLensDirection.back) {
+        state = state.copyWith(selectedCameraIndex: 0);
+      } else {
+        state = state.copyWith(selectedCameraIndex: 1);
       }
     }
+      
   }
-
-
 
 
   Future<void> switchCamera() async {

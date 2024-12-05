@@ -3,12 +3,12 @@ import 'package:camera/camera.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
   final CameraController cameraController;
-  final bool showCircleOverlay; // Tambahkan parameter ini
+  final bool showCircleOverlay;
 
   const CameraPreviewWidget({
     Key? key,
     required this.cameraController,
-    this.showCircleOverlay = true, // Default adalah true
+    this.showCircleOverlay = true,
   }) : super(key: key);
 
   @override
