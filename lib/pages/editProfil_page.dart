@@ -1,16 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frame_fit/providers/editProfil_provider.dart';
 
-class EditProfilePage extends StatelessWidget {
+class EditProfilePage extends ConsumerStatefulWidget {
   const EditProfilePage({super.key});
 
   @override
+  ConsumerState<EditProfilePage> createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends ConsumerState<EditProfilePage> {
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
+  late TextEditingController emailController;
+
+  @override
+  void initState() {
+    super.initState();
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
+    emailController = TextEditingController();
+    _fetchProfile();
+  }
+
+  Future<void> _fetchProfile() async {
+    await ref.read(editProfileProvider.notifier).fetchProfile();
+  }
+
+  Future<void> _updateProfile() async {
+    final profile = EditProfile(
+      firstName: firstNameController.text,
+      lastName: lastNameController.text,
+      email: emailController.text,
+    );
+
+    await ref.read(editProfileProvider.notifier).updateProfile(profile);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profil berhasil diperbarui')),
+    );
+    Navigator.pop(context, true);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Memanfaatkan Riverpod untuk mendengarkan perubahan state
+    final profile = ref.watch(editProfileProvider);
+
+    // Jika profil belum ada (loading), tampilkan CircularProgressIndicator
+    if (profile == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leadingWidth: 80,
+          leading: TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Batal',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: null, // Tidak aktifkan Simpan selama loading
+              child: const Text(
+                'Simpan',
+                style: TextStyle(color: Colors.blue),
+              ),
+            ),
+          ],
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Jika data profil sudah ada, tampilkan form
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0, // Hilangkan bayangan
-        leadingWidth: 80, 
+        elevation: 0,
+        leadingWidth: 80,
         leading: TextButton(
           onPressed: () {
             Navigator.pop(context);
@@ -21,12 +95,11 @@ class EditProfilePage extends StatelessWidget {
           ),
         ),
         actions: [
-          // Tombol Simpan diaktifkan
           TextButton(
-            onPressed: null,
+            onPressed: _updateProfile,
             child: const Text(
               'Simpan',
-              style: TextStyle(color: Colors.grey), // Ubah warna teks menjadi biru
+              style: TextStyle(color: Colors.blue),
             ),
           ),
         ],
@@ -41,16 +114,19 @@ class EditProfilePage extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.grey,
-                  child: const Icon(Icons.camera_alt, size: 50, color: Colors.white),
+                  backgroundImage: profile.profileImageUrl != null
+                      ? NetworkImage(profile.profileImageUrl!)
+                      : null,
+                  child: profile.profileImageUrl == null
+                      ? const Icon(Icons.camera_alt, size: 50, color: Colors.white)
+                      : null,
                 ),
               ),
               const SizedBox(height: 8),
-              
-              // Tombol untuk mengganti foto profil
               Center(
                 child: TextButton(
                   onPressed: () {
-                    // Tambahkan aksi untuk mengganti foto profil
+                    // Aksi untuk mengganti foto profil
                   },
                   child: const Text(
                     'Edit',
@@ -59,25 +135,19 @@ class EditProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              
-              // Kotak untuk First Name dan Last Name
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextFieldContainer('Nama Awal', 'Joko'),
+                    child: _buildTextFieldContainer('Nama Awal', firstNameController, profile.firstName),
                   ),
-                  const SizedBox(width: 16), // Beri jarak antara kedua kotak
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTextFieldContainer('Nama Akhir', 'Tingkir'),
+                    child: _buildTextFieldContainer('Nama Akhir', lastNameController, profile.lastName),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              // Kotak untuk Email
-              _buildTextFieldContainer('Email', 'Baputritaz@polinema.ac.id'),
-              const SizedBox(height: 8),
-              // Kotak untuk Phone Number
-              _buildTextFieldContainer('Nomor HP', '+62 822 2899 8041'),
+              _buildTextFieldContainer('Email', emailController, profile.email),
             ],
           ),
         ),
@@ -85,8 +155,8 @@ class EditProfilePage extends StatelessWidget {
     );
   }
 
-  // Widget untuk membangun kotak dengan TextField
-  Widget _buildTextFieldContainer(String label, String placeholder) {
+  Widget _buildTextFieldContainer(String label, TextEditingController controller, String initialValue) {
+    controller.text = initialValue; // Menetapkan nilai awal dari provider
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,18 +167,18 @@ class EditProfilePage extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey), // Border kotak
-            borderRadius: BorderRadius.circular(8.0), // Sudut kotak
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           child: TextField(
+            controller: controller,
             decoration: InputDecoration(
-              hintText: placeholder, // Tampilkan placeholder
-              border: InputBorder.none, // Hilangkan border default TextField
-              contentPadding: const EdgeInsets.all(8.0), // Padding dalam kotak
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(8.0),
             ),
           ),
         ),
-        const SizedBox(height: 16), // Beri jarak antar field
+        const SizedBox(height: 16),
       ],
     );
   }
