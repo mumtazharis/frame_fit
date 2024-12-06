@@ -13,9 +13,9 @@ class Glasses {
 
   factory Glasses.fromJson(Map<String, dynamic> json) {
     return Glasses(
-      name: json['model'], // Ganti ke 'model' sesuai respons API
-      category: json['bentuk'], // Ganti ke 'bentuk' sesuai respons API
-      imagePath: json['foto'], // Properti untuk URL gambar
+      name: json['model'],
+      category: json['bentuk'],
+      imagePath: json['foto'],
       isFavorite: json['isFavorite'] ?? false,
     );
   }
