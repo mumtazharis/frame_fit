@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frame_fit/pages/beranda_page.dart';
+// import 'package:frame_fit/pages/beranda_page.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/glasses_model.dart';
 
 class FavoritePage extends StatelessWidget {
   final List<Glasses> favoriteGlassesList;
