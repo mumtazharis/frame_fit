@@ -23,11 +23,17 @@ class GlassesNotifier extends StateNotifier<List<Glasses>> {
 
     try {
       final token = await _getToken();
-      if (token == null) return;
+
+      if (token == null) {
+        print('Token tidak ditemukan');
+        return;
+      }
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
       );
 
       if (response.statusCode == 200) {
@@ -47,7 +53,11 @@ class GlassesNotifier extends StateNotifier<List<Glasses>> {
   }
 
   void toggleFavorite(Glasses glasses) {
-    glasses.isFavorite = !glasses.isFavorite;
-    state = [...state];
+    state = state.map((item) {
+      if (item == glasses) {
+        return item.copyWith(isFavorite: !item.isFavorite);
+      }
+      return item;
+    }).toList();
   }
 }

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import '../models/glasses_model.dart';
 
-class GlassesCard extends StatelessWidget {
+class ProductCard extends StatelessWidget {
   final Glasses glasses;
+  final VoidCallback onTap;
 
-  const GlassesCard({Key? key, required this.glasses}) : super(key: key);
+  const ProductCard({
+    required this.glasses,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        // Implementasi klik card
-      },
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

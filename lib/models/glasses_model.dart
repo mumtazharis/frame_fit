@@ -19,4 +19,13 @@ class Glasses {
       isFavorite: json['isFavorite'] ?? false,
     );
   }
+
+  Glasses copyWith({bool? isFavorite}) {
+    return Glasses(
+      name: this.name,
+      category: this.category,
+      imagePath: this.imagePath,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
 }
