@@ -4,6 +4,7 @@ import '../providers/glasses_provider.dart';
 import '../providers/glasses_detail_provider.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/selectedCategoryProvider.dart';
+import '../providers/search_provider.dart'; // Import provider untuk pencarian
 import '../widgets/category_tab.dart';
 import '../widgets/product_card.dart';
 import '../models/glasses_model.dart';
@@ -13,8 +14,15 @@ class BerandaPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Mendapatkan daftar kacamata dari provider
     final glassesList = ref.watch(glassesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
+    final searchQuery = ref.watch(searchProvider); // Mendapatkan query pencarian
+
+    // Filter kacamata berdasarkan pencarian
+    final filteredGlassesList = glassesList
+        .where((glasses) => glasses.name.toLowerCase().contains(searchQuery.toLowerCase()))
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -22,45 +30,67 @@ class BerandaPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header kategori
+            // Header kategori dan filter pencarian
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CategoryTab(
-                    label: 'Semua',
-                    isSelected: selectedCategory == 'Semua',
-                    onTap: () {
-                      ref.read(selectedCategoryProvider.notifier).updateCategory('Semua');
-                      ref.read(glassesProvider.notifier).fetchGlasses(gender: '');
+                  // Kolom pencarian
+                  TextField(
+                    onChanged: (query) {
+                      ref.read(searchProvider.notifier).updateSearchQuery(query); // Update query pencarian
                     },
+                    decoration: InputDecoration(
+                      hintText: 'Cari Kacamata...',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
                   ),
-                  CategoryTab(
-                    label: 'Koleksi Pria',
-                    isSelected: selectedCategory == 'Koleksi Pria',
-                    onTap: () {
-                      ref.read(selectedCategoryProvider.notifier).updateCategory('Koleksi Pria');
-                      ref.read(glassesProvider.notifier).fetchGlasses(gender: 'male');
-                    },
-                  ),
-                  CategoryTab(
-                    label: 'Koleksi Wanita',
-                    isSelected: selectedCategory == 'Koleksi Wanita',
-                    onTap: () {
-                      ref.read(selectedCategoryProvider.notifier).updateCategory('Koleksi Wanita');
-                      ref.read(glassesProvider.notifier).fetchGlasses(gender: 'female');
-                    },
+                  const SizedBox(height: 16),
+
+                  // Baris kategori
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      CategoryTab(
+                        label: 'Semua',
+                        isSelected: selectedCategory == 'Semua',
+                        onTap: () {
+                          ref.read(selectedCategoryProvider.notifier).updateCategory('Semua');
+                          ref.read(glassesProvider.notifier).fetchGlasses(gender: '');
+                        },
+                      ),
+                      CategoryTab(
+                        label: 'Koleksi Pria',
+                        isSelected: selectedCategory == 'Koleksi Pria',
+                        onTap: () {
+                          ref.read(selectedCategoryProvider.notifier).updateCategory('Koleksi Pria');
+                          ref.read(glassesProvider.notifier).fetchGlasses(gender: 'male');
+                        },
+                      ),
+                      CategoryTab(
+                        label: 'Koleksi Wanita',
+                        isSelected: selectedCategory == 'Koleksi Wanita',
+                        onTap: () {
+                          ref.read(selectedCategoryProvider.notifier).updateCategory('Koleksi Wanita');
+                          ref.read(glassesProvider.notifier).fetchGlasses(gender: 'female');
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
 
-            // GridView produk kacamata
+            // Menampilkan GridView produk kacamata yang terfilter
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: glassesList.isEmpty
+                child: filteredGlassesList.isEmpty
                     ? const Center(child: CircularProgressIndicator())
                     : GridView.builder(
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -69,9 +99,9 @@ class BerandaPage extends ConsumerWidget {
                           mainAxisSpacing: 10,
                           childAspectRatio: 0.75,
                         ),
-                        itemCount: glassesList.length,
+                        itemCount: filteredGlassesList.length,
                         itemBuilder: (context, index) {
-                          final glasses = glassesList[index];
+                          final glasses = filteredGlassesList[index];
                           return ProductCard(
                             glasses: glasses,
                             onTap: () {
@@ -90,7 +120,6 @@ class BerandaPage extends ConsumerWidget {
 
   // Menampilkan detail produk dalam pop-up
   void _showGlassesDetailPopup(BuildContext context, Glasses glasses, WidgetRef ref) {
-    // Set detail produk yang dipilih
     ref.read(glassesDetailProvider.notifier).setGlassesDetail(glasses);
     ref.read(favoriteProvider.notifier).setFavoriteStatus(glasses.isFavorite);
 
@@ -99,7 +128,6 @@ class BerandaPage extends ConsumerWidget {
       builder: (BuildContext context) {
         return Consumer(
           builder: (context, ref, child) {
-            // Mendapatkan status favorit dari provider
             bool isFavorite = ref.watch(favoriteProvider);
 
             return Dialog(
@@ -112,7 +140,6 @@ class BerandaPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Baris atas dengan judul dan tombol close
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -135,7 +162,6 @@ class BerandaPage extends ConsumerWidget {
                     Divider(thickness: 1, color: Colors.grey.shade300),
                     Row(
                       children: [
-                        // Gambar di sebelah kiri
                         Container(
                           width: 100,
                           height: 100,
@@ -173,11 +199,9 @@ class BerandaPage extends ConsumerWidget {
                       ],
                     ),
                     const Spacer(),
-                    // Row untuk tombol "Coba" dan tombol "Love"
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Tombol "Coba"
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
@@ -203,7 +227,6 @@ class BerandaPage extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        // Tombol "Love"
                         Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
