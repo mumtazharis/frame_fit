@@ -9,12 +9,26 @@ import '../widgets/category_tab.dart';
 import '../widgets/product_card.dart';
 import '../models/glasses_model.dart';
 
-class BerandaPage extends ConsumerWidget {
+class BerandaPage extends ConsumerStatefulWidget {
   const BerandaPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Mendapatkan daftar kacamata dari provider
+  _BerandaPageState createState() => _BerandaPageState();
+}
+
+class _BerandaPageState extends ConsumerState<BerandaPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Memastikan data dimuat saat halaman pertama kali dibuka
+    ref.read(selectedCategoryProvider.notifier).updateCategory('Semua');
+    ref.read(glassesProvider.notifier).fetchGlasses(gender: ''); // Memuat semua data kacamata
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Mendapatkan daftar kacamata dan kategori yang dipilih
     final glassesList = ref.watch(glassesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final searchQuery = ref.watch(searchProvider); // Mendapatkan query pencarian
@@ -91,7 +105,7 @@ class BerandaPage extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: filteredGlassesList.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: Text('Hasil Pencarian Tidak Ditemukan'))  // Pesan jika hasil pencarian kosong
                     : GridView.builder(
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
