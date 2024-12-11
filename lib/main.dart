@@ -8,7 +8,7 @@ import 'pages/daftar.dart';
 import 'pages/masuk_akun.dart';
 import 'pages/profil_page.dart';
 import 'pages/beranda_page.dart';
-import 'pages/favorit_page.dart';
+import 'pages/favorite_page.dart';
 import 'pages/navbar.dart';
 import '../config/api_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,6 +52,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, 
       initialRoute: isTokenValid ? '/navbar' : '/',
       routes: {
         '/': (context) => HomePage(),
@@ -86,7 +87,7 @@ Future<bool> isValidToken(String token) async {
       },
     );
 
-    return response.statusCode == 200; // Anggap token valid jika status 200
+    return response.statusCode == 500; // Anggap token valid jika status 200
   } catch (e) {
     print('Error saat memverifikasi token: $e');
     return false;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frame_fit/pages/masuk_akun.dart';
 import 'package:frame_fit/pages/beranda_page.dart';
+import 'navbar.dart';
 
 class LoadingScreen extends StatefulWidget {
   final String nextPage;  // pastikan ada deklarasi parameter nextPage di sini
@@ -17,17 +18,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 2), () {
+    Timer(Duration(milliseconds: 500), () {
       // Navigasi berdasarkan nextPage
       if (widget.nextPage == 'MasukAkunPage') {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MasukAkunPage()),
         );
-      } else if (widget.nextPage == 'BerandaPage') {
+      } else if (widget.nextPage == 'NavbarPage') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BerandaPage()),
+          MaterialPageRoute(builder: (context) => NavbarPage()),
         );
       }
     });

@@ -94,7 +94,7 @@ class HomePage extends StatelessWidget {
                           Navigator.pushNamed(context, '/camera');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue, // Warna latar belakang tombol
+                          backgroundColor: const Color.fromARGB(255, 33, 72, 243),
                           foregroundColor: Colors.white, // Warna teks tombol
                           padding: EdgeInsets.symmetric(horizontal: 70, vertical: 20), // Ukuran tombol lebih besar
                           shape: RoundedRectangleBorder(

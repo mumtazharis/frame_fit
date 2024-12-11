@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frame_fit/pages/loading_screen.dart';
 import 'package:frame_fit/providers/masuk_provider.dart'; // Import provider
 import 'navbar.dart';
+
 class MasukAkunPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<MasukAkunPage> createState() => _MasukAkunPageState();
@@ -14,25 +15,21 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
   bool _isPasswordVisible = false;
 
   Future<void> _login() async {
-    // Panggil fungsi login dari AuthNotifier
     await ref.read(authProvider.notifier).login(
           _emailController.text,
           _passwordController.text,
         );
 
-    // Ambil state terbaru setelah login
     final updatedAuthState = ref.read(authProvider);
 
-    // Lakukan navigasi jika token berhasil diperoleh
     if (updatedAuthState.accessToken != null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => NavbarPage(),
+          builder: (context) => LoadingScreen(nextPage: 'NavbarPage'), 
         ),
       );
     } else if (updatedAuthState.errorMessage != null) {
-      // Jika ada error, tampilkan pesan error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(updatedAuthState.errorMessage!)),
       );
@@ -50,9 +47,7 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Center(
                     child: Padding(
@@ -60,7 +55,7 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          SizedBox(height: 90),
+                          SizedBox(height: 150),
                           Image.asset(
                             'assets/images/logo_pt.png',
                             width: 175,
@@ -95,7 +90,9 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
                                 prefixIcon: Icon(Icons.lock),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                    _isPasswordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -103,6 +100,22 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
                                     });
                                   },
                                 ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                // Aksi lupa password
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Fitur Lupa Password belum tersedia.')),
+                                );
+                              },
+                              child: Text(
+                                'Lupa Password?',
+                                style: TextStyle(color: Colors.blue),
                               ),
                             ),
                           ),

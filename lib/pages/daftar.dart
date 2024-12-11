@@ -46,14 +46,15 @@ class _DaftarPageState extends ConsumerState<DaftarPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start, // Elemen mulai dari atas
                         children: <Widget>[
+                          SizedBox(height: 150),
                           Image.asset(
                             'assets/images/logo_pt.png',
                             width: 175,
                             height: 175,
                           ),
-                          SizedBox(height: 70),
+                          SizedBox(height: 80),
                           Container(
                             width: 350,
                             child: TextField(
@@ -72,9 +73,9 @@ class _DaftarPageState extends ConsumerState<DaftarPage> {
                           ),
                           SizedBox(height: 16),
                           Container(
-                            width: 360,
+                            width: 350,
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Checkbox(
                                   value: _isCheckboxChecked,
@@ -85,59 +86,62 @@ class _DaftarPageState extends ConsumerState<DaftarPage> {
                                   },
                                 ),
                                 Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      text: 'Dengan membuat akun, Anda menyetujui ',
-                                      style: TextStyle(fontSize: 12, color: Colors.black),
-                                      children: [
-                                        TextSpan(
-                                          text: 'Ketentuan Penggunaan',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.blue,
-                                            decoration: TextDecoration.underline,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        text: 'Dengan membuat akun, Anda menyetujui ',
+                                        style: TextStyle(fontSize: 12, color: Colors.black),
+                                        children: [
+                                          TextSpan(
+                                            text: 'Ketentuan Penggunaan',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.blue,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => KetentuanPage(),
+                                                  ),
+                                                );
+                                              },
                                           ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => KetentuanPage(),
-                                                ),
-                                              );
-                                            },
-                                        ),
-                                        TextSpan(
-                                          text: ' dan ',
-                                        ),
-                                        TextSpan(
-                                          text: 'Kebijakan Privasi',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.blue,
-                                            decoration: TextDecoration.underline,
+                                          TextSpan(
+                                            text: ' dan ',
                                           ),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => KebijakanPage(),
-                                                ),
-                                              );
-                                            },
-                                        ),
-                                        TextSpan(
-                                          text: '.',
-                                        ),
-                                      ],
+                                          TextSpan(
+                                            text: 'Kebijakan Privasi',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.blue,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => KebijakanPage(),
+                                                  ),
+                                                );
+                                              },
+                                          ),
+                                          TextSpan(
+                                            text: '.',
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 30),
                           authState.isLoading
                               ? CircularProgressIndicator()
                               : ElevatedButton(
@@ -168,54 +172,6 @@ class _DaftarPageState extends ConsumerState<DaftarPage> {
                                     style: TextStyle(fontSize: 16, color: Colors.white),
                                   ),
                                 ),
-                          if (authState.errorMessage != null) ...[
-                            SizedBox(height: 8),
-                            Text(
-                              authState.errorMessage!,
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          ],
-                          SizedBox(height: 30),
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Divider(
-                                  thickness: 2,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: Text('atau lanjutkan dengan'),
-                              ),
-                              Expanded(
-                                child: Divider(
-                                  thickness: 2,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: Image.asset('assets/icon/gmail.png', width: 36, height: 36),
-                              ),
-                              SizedBox(width: 16),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.facebook, size: 36, color: Colors.blue),
-                              ),
-                              SizedBox(width: 16),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Image.asset('assets/icon/x.png', width: 36, height: 36),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),

@@ -3,7 +3,7 @@ import 'package:frame_fit/pages/aboutUs_page.dart';
 import 'package:frame_fit/pages/contactUs_page.dart';
 import 'package:frame_fit/pages/ubahPassword_page.dart';
 import 'beranda_page.dart';
-import 'favorit_page.dart';
+import 'favorite_page.dart';
 import 'camera_page.dart';
 import 'profil_page.dart';
 
