@@ -17,7 +17,7 @@ class _NavbarState extends State<NavbarPage> {
 
   final List<Widget> _pages = [
     BerandaPage(),
-    FavoritePage(favoriteGlassesList: [],),
+    FavoritePage(),
     CameraPage(),
     ProfilePage(),
     UbahPasswordPage(),

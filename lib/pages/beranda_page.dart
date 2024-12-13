@@ -135,14 +135,13 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
   // Menampilkan detail produk dalam pop-up
   void _showGlassesDetailPopup(BuildContext context, Glasses glasses, WidgetRef ref) {
     ref.read(glassesDetailProvider.notifier).setGlassesDetail(glasses);
-    ref.read(favoriteProvider.notifier).setFavoriteStatus(glasses.isFavorite);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Consumer(
           builder: (context, ref, child) {
-            bool isFavorite = ref.watch(favoriteProvider);
+            bool isFavorite = ref.watch(favoriteProvider).contains(glasses);
 
             return Dialog(
               backgroundColor: Colors.white,
@@ -219,7 +218,7 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.pop(context); // Menutup dialog
+                              Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
@@ -252,7 +251,7 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
                               color: isFavorite ? Colors.red : Colors.grey,
                             ),
                             onPressed: () {
-                              ref.read(favoriteProvider.notifier).toggleFavorite();
+                              ref.read(favoriteProvider.notifier).toggleFavorite(glasses);
                             },
                           ),
                         ),
@@ -267,4 +266,5 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
       },
     );
   }
+
 }

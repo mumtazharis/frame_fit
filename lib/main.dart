@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
               child: BerandaPage(),
             ),
         '/favorit': (context) => TokenValidationWrapper(
-              child: FavoritePage(favoriteGlassesList: [],),
+              child: FavoritePage(),
             ),
         
       },
