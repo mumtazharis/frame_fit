@@ -12,7 +12,7 @@ class ARPreviewPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final arState = ref.watch(ARProvider);
     final arNotifier = ref.watch(ARProvider.notifier);
-
+    
     double statusBarHeight = MediaQuery.of(context).padding.top;
     Size screenSize = MediaQuery.of(context).size;
     
@@ -207,68 +207,87 @@ class ARPreviewPage extends ConsumerWidget {
                 color: Colors.white,
               ),
             ),
-               Positioned(
-                
-                    top: screenSize.height * 0.8 - 60,
-                    left: 0,
-                    right: 0,
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: arState.isLoading
-                          ? Center(child: CircularProgressIndicator())
-                          : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  height: 120,
-                                  child: Swiper(
-                                    controller: _swiperController, // Menggunakan controller yang sudah didefinisikan
-                                    index: arState.selectedGlassesIndex,
-                                    itemCount:arState.kacamataAssets.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                      return Container(
-                                        padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.black,
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        child: ClipOval(
-                                          child: Image.network(
-                                            arState.kacamataAssets[index],
-                                            fit: BoxFit.contain,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              print('Error loading image: $error');
-                                              return Text('Error loading image');
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    viewportFraction: 0.4,
-                                    scale: 0.85,
-                                    loop: false,
-                                    onIndexChanged: (index) {
-                                      arNotifier.updateSelectedGlassesIndex(index);
-                                    },
+            Positioned(
+            
+                top: screenSize.height * 0.8 - 60,
+                left: 0,
+                right: 0,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: arState.isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              height: 120,
+                              child: Swiper(
+                                controller: _swiperController, // Menggunakan controller yang sudah didefinisikan
+                                index: arState.selectedGlassesIndex,
+                                itemCount:arState.kacamataAssets.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Container(
+                                    padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: Colors.black,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: ClipOval(
+                                      child: Image.network(
+                                        arState.kacamataAssets[index],
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          print('Error loading image: $error');
+                                          return Text('Error loading image');
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                                viewportFraction: 0.4,
+                                scale: 0.85,
+                                loop: false,
+                                onIndexChanged: (index) {
+                                  arNotifier.updateSelectedGlassesIndex(index);
+                                },
 
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 20.0),
-                                  child: Icon(
-                                    Icons.keyboard_arrow_up,
-                                    size: 40,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                  ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 20.0),
+                              child: Icon(
+                                Icons.keyboard_arrow_up,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+              ),
+            ),
+            Positioned(
+              top: 50, // Posisi tombol silang dari atas preview
+              left: 16, // Jarak dari sisi kiri
+              child: Container(
+                width: 40, // Lebar yang diinginkan untuk latar belakang
+                height: 40, // Tinggi yang diinginkan untuk latar belakang
+                decoration: BoxDecoration(
+                  color: Colors.white, // Ganti dengan warna latar belakang yang diinginkan
+                  borderRadius: BorderRadius.circular(15), // Radius sudut untuk tampilan yang lebih halus
                 ),
+                child: IconButton(
+                  icon: const Icon(Icons.close, size: 24, color: Colors.black), // Ikon silang
+                  onPressed: () {
+                    Navigator.pop(context); // Menutup halaman
+                  },
+                  tooltip: 'Tutup',
+                ),
+              ),
+            ),
           ],
         ),
       ) : Center(child: CircularProgressIndicator()),

@@ -12,8 +12,56 @@ class ImagePreviewPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(cameraProvider);
     final arNotifier = ref.watch(ARProvider.notifier);
+    
+    void _showGenderSelectionDialog() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Pilih Jenis Kelamin'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: const Text('Laki-laki'),
+                  leading: const Icon(Icons.male),
+                  onTap: () {
+                    Navigator.pop(context, 'male');
+                  },
+                ),
+                ListTile(
+                  title: const Text('Perempuan'),
+                  leading: const Icon(Icons.female),
+                  onTap: () {
+                    Navigator.pop(context, 'female');
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ).then((selectedGender) {
+        if (selectedGender != null) {
+          // Simpan gender ke dalam predictionResult
+          state.predictionResult!['gender'] = selectedGender;
 
-  
+          arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
+          
+          arNotifier.initializeFaceDetector();
+   
+          arNotifier.updateInformasiRekomendasi(state.predictionResult!['predicted_label'], selectedGender);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ARPreviewPage(
+          
+              ),
+            ),
+          );
+        }
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preview Image'),
@@ -60,22 +108,21 @@ class ImagePreviewPage extends ConsumerWidget {
               onPressed: () {
                 if (state.predictionResult != null &&
                     state.predictionResult!.containsKey('predicted_label')) {
-                        arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
-                        arNotifier.updateBentukWajah(state.predictionResult!['predicted_label']);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ARPreviewPage(
-                        // selectedCameraIndex: state.selectedCameraIndex,
-                        // bentuk_wajah: state.predictionResult!['predicted_label'],
-                      ),
-                    ),
-                  );
+                  _showGenderSelectionDialog();
                 }
               },
-              child: const Text('Preview AR'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 33, 72, 243), // Warna latar belakang tombol
+                foregroundColor: Colors.white, // Warna teks tombol
+                padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 20), // Ukuran tombol lebih besar
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0), // Sudut tombol melengkung
+                ),
+              ),
+              child: const Text('Lihat Rekomendasi'),
             ),
           ),
+
         ],
       ),
     );

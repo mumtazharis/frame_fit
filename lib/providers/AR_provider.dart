@@ -17,6 +17,7 @@ class ARState {
   final CameraController? cameraController;
   final int? selectedCameraIndex;
   final String? bentukWajah;
+  final String? gender;
   final FaceDetector? faceDetector;
   final List<Face> faces;
   final List<String> kacamataAssets;
@@ -27,6 +28,7 @@ class ARState {
     this.cameraController,
     this.selectedCameraIndex = 0,
     this.bentukWajah,
+    this.gender,
     this.faceDetector,
     this.faces = const [],
     this.kacamataAssets = const [],
@@ -38,6 +40,7 @@ class ARState {
     CameraController? cameraController,
     int? selectedCameraIndex,
     String? bentukWajah,
+    String? gender,
     FaceDetector? faceDetector,
     List<Face>? faces,
     List<String>? kacamataAssets,
@@ -48,6 +51,7 @@ class ARState {
       cameraController: cameraController ?? this.cameraController,
       selectedCameraIndex: selectedCameraIndex ?? this.selectedCameraIndex,
       bentukWajah: bentukWajah ?? this.bentukWajah,
+      gender: gender ?? this.gender,
       faceDetector: faceDetector ?? this.faceDetector,
       faces: faces ?? this.faces,
       kacamataAssets: kacamataAssets ?? this.kacamataAssets,
@@ -61,19 +65,21 @@ class ARState {
 class ARNotifier extends StateNotifier<ARState> {
   CameraController? cameraController;
   ARNotifier() : super(ARState()) {
-     _initializeFaceDetector();
 
     
   }
+
   void setSelectedCameraIndex(int index) {
     state = state.copyWith(selectedCameraIndex: index);
 
-    _initializeCamera();
   }
-  void updateBentukWajah(String bentukWajah) {
+  void updateInformasiRekomendasi(String bentukWajah, String gender) {
     print('Updating bentuk wajah to: $bentukWajah');  // Log to confirm update
+    print('Updating gender to: $gender');  // Log to confirm update
     state = state.copyWith(bentukWajah: bentukWajah);
+    state = state.copyWith(gender: gender);
     print('Updated bentuk wajah: ${state.bentukWajah}');  
+    print('Updated gender: ${state.gender}');  
     _fetchRekomendasiKacamata();// Log to confirm after update
   }
   void updateSelectedGlassesIndex(int index) {
@@ -81,7 +87,8 @@ class ARNotifier extends StateNotifier<ARState> {
   }
 
 
-  void _initializeFaceDetector() {
+  void initializeFaceDetector() {
+    initializeCamera();
     final faceDetector = FaceDetector(
       options: FaceDetectorOptions(
         enableLandmarks: true,
@@ -94,45 +101,50 @@ class ARNotifier extends StateNotifier<ARState> {
     
   }
 
-Future<void> _initializeCamera() async {
-  try {
-    print("Inisialisasi kamera dimulai...");
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) {
-      print("Tidak ada kamera yang tersedia.");
-      return;
+  Future<void> initializeCamera() async {
+    try {
+      print("Inisialisasi kamera dimulai...");
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        print("Tidak ada kamera yang tersedia.");
+        return;
+      }
+
+      // final selectedCamera = cameras[state.selectedCameraIndex];
+      final cameraController = CameraController(
+        cameras[state.selectedCameraIndex ?? 0],
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+
+      await cameraController.initialize();
+      // await state.cameraController?.stopImageStream();
+
+      state = state.copyWith(cameraController: cameraController);
+      print("Kamera berhasil diinisialisasi.");
+      _startFaceDetection();
+    } catch (e) {
+      print('Error initializing camera: $e');
     }
-
-    // final selectedCamera = cameras[state.selectedCameraIndex];
-    final cameraController = CameraController(
-      cameras[state.selectedCameraIndex ?? 0],
-      ResolutionPreset.high,
-      enableAudio: false,
-    );
-
-    await cameraController.initialize();
-    await state.cameraController?.stopImageStream();
-
-    state = state.copyWith(cameraController: cameraController);
-    print("Kamera berhasil diinisialisasi.");
-    _startFaceDetection();
-  } catch (e) {
-    print('Error initializing camera: $e');
   }
-}
 
   Future<void> _fetchRekomendasiKacamata() async {
-    if (state.bentukWajah == null) {
-      print('Bentuk wajah belum tersedia.');
+    if (state.bentukWajah == null || state.gender == null) {
+      print('Bentuk wajah atau gender belum tersedia.');
       return;
     }
+
     state = state.copyWith(isLoading: true);
+
     try {
-      final response = await http.get(
-        Uri.parse(
-          '${ApiConfig.baseUrl}/api/rekomendasi_kacamata?bentuk_wajah=${state.bentukWajah}',
-        ),
-      );
+      // Membangun URL dengan query parameters
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/rekomendasi_kacamata')
+          .replace(queryParameters: {
+        'bentuk_wajah': state.bentukWajah!,
+        'gender': state.gender!,
+      });
+
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -151,6 +163,7 @@ Future<void> _initializeCamera() async {
       state = state.copyWith(isLoading: false);
     }
   }
+
 
   Future<void> _startFaceDetection() async {
     state.cameraController!.startImageStream((CameraImage image) async {
@@ -190,9 +203,29 @@ Future<void> _initializeCamera() async {
     state = state.copyWith(selectedGlassesIndex: index);
   }
 
+
+  void stopCameraAndFaceDetection() async {
+    try {
+      print("Menghentikan face detection...");
+      await state.cameraController?.stopImageStream(); // Pastikan stream dihentikan
+      await state.faceDetector?.close(); // Tutup FaceDetector
+      state = state.copyWith(faceDetector: null);
+
+      print("Mematikan kamera...");
+      await state.cameraController?.dispose(); // Bebaskan kamera
+      state = state.copyWith(cameraController: null);
+
+      print("Kamera dan face detection berhasil dimatikan.");
+    } catch (e) {
+      print("Error saat mematikan kamera atau face detection: $e");
+    }
+  }
+
+
   @override
   void dispose() {
-    state.cameraController?.dispose();
+    stopCameraAndFaceDetection();
     super.dispose();
   }
+
 }
