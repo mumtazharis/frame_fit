@@ -68,7 +68,7 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
-                                labelText: 'Masukkan email',
+                                labelText: 'Masukkan Email',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -83,7 +83,7 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
                               controller: _passwordController,
                               obscureText: !_isPasswordVisible,
                               decoration: InputDecoration(
-                                labelText: 'Masukkan password',
+                                labelText: 'Masukkan Kata Sandi',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -110,11 +110,11 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
                               onPressed: () {
                                 // Aksi lupa password
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Fitur Lupa Password belum tersedia.')),
+                                  SnackBar(content: Text('Fitur Lupa Kata Sandi belum tersedia.')),
                                 );
                               },
                               child: Text(
-                                'Lupa Password?',
+                                'Lupa Kata Sandi?',
                                 style: TextStyle(color: Colors.blue),
                               ),
                             ),
