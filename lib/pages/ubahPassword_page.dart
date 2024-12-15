@@ -1,33 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frame_fit/providers/ubahPassword_provider.dart';
 
-class UbahPasswordPage extends StatefulWidget {
+class UbahPasswordPage extends ConsumerStatefulWidget {
   const UbahPasswordPage({super.key});
 
   @override
   _UbahPasswordPageState createState() => _UbahPasswordPageState();
 }
 
-class _UbahPasswordPageState extends State<UbahPasswordPage> {
+class _UbahPasswordPageState extends ConsumerState<UbahPasswordPage> {
   final TextEditingController _passwordLamaController = TextEditingController();
   final TextEditingController _passwordBaruController = TextEditingController();
   final TextEditingController _konfirmasiPasswordController = TextEditingController();
-  bool _isPasswordVisible = false; // Variabel untuk mengatur visibilitas password
+
+  bool _isPasswordLamaVisible = false;
+  bool _isPasswordBaruVisible = false;
+  bool _isKonfirmasiPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
+    final passwordState = ref.watch(passwordChangeProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Menghilangkan ikon kembali
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 20.0, top: 20.0), // Atur posisi tulisan
+            padding: const EdgeInsets.only(right: 20.0, top: 20.0),
             child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context); // Kembali ke halaman sebelumnya
-              },
+              onTap: () => Navigator.pop(context),
               child: const Text(
                 'Batal',
                 style: TextStyle(color: Colors.black, fontSize: 16),
@@ -43,100 +49,52 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ubah Password',
+                'Ubah Kata Sandi',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 20), // Jarak setelah judul
+              const SizedBox(height: 20),
 
-              // Password Lama
-              //const Text('Password Lama', style: TextStyle(fontSize: 16)),
-              Container(
-                width: 350, // Lebar tetap
-                child: TextField(
-                  controller: _passwordLamaController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Password Lama',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: Icon(Icons.lock), // Ikon kunci untuk password lama
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible; // Toggle password visibility
-                        });
-                      },
-                    ),
-                  ),
-                ),
+              // Kata Sandi Lama
+              _buildPasswordTextField(
+                controller: _passwordLamaController,
+                labelText: 'Kata Sandi Lama',
+                isVisible: _isPasswordLamaVisible,
+                onVisibilityToggle: () => setState(() {
+                  _isPasswordLamaVisible = !_isPasswordLamaVisible;
+                }),
               ),
               const SizedBox(height: 24),
 
-              // Password Baru
-              //const Text('Password Baru', style: TextStyle(fontSize: 16)),
-              Container(
-                width: 350,
-                child: TextField(
-                  controller: _passwordBaruController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Password Baru',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: Icon(Icons.lock_outline), // Ikon untuk password baru
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible; // Toggle password visibility
-                        });
-                      },
-                    ),
-                  ),
-                ),
+              // Kata Sandi Baru
+              _buildPasswordTextField(
+                controller: _passwordBaruController,
+                labelText: 'Kata Sandi Baru',
+                isVisible: _isPasswordBaruVisible,
+                onChanged: (password) {
+                  ref.read(passwordChangeProvider.notifier).validatePassword(password);
+                },
+                onVisibilityToggle: () => setState(() {
+                  _isPasswordBaruVisible = !_isPasswordBaruVisible;
+                }),
               ),
               const SizedBox(height: 8),
-              const Text(
-                '• Minimum 8 karakter\n• Huruf besar, huruf kecil, angka, dan satu karakter khusus',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
+              
+              // Password Requirement Rows
+              _buildPasswordRequirementRow('Minimum 8 karakter', passwordState.hasMinLength),
+              _buildPasswordRequirementRow('Mengandung huruf besar', passwordState.hasUppercase),
+              _buildPasswordRequirementRow('Mengandung huruf kecil', passwordState.hasLowercase),
+              _buildPasswordRequirementRow('Mengandung angka', passwordState.hasDigits),
+              _buildPasswordRequirementRow('Mengandung karakter khusus', passwordState.hasSpecialChar),
+              const SizedBox(height: 16),
 
-              // Konfirmasi Password Baru
-              //const Text('Konfirmasi Password Baru', style: TextStyle(fontSize: 16)),
-              Container(
-                width: 350,
-                child: TextField(
-                  controller: _konfirmasiPasswordController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Konfirmasi Password Baru',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: Icon(Icons.lock), // Ikon untuk konfirmasi password
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible; // Toggle password visibility
-                        });
-                      },
-                    ),
-                  ),
-                ),
+              // Konfirmasi Kata Sandi Baru
+              _buildPasswordTextField(
+                controller: _konfirmasiPasswordController,
+                labelText: 'Konfirmasi Kata Sandi Baru',
+                isVisible: _isKonfirmasiPasswordVisible,
+                onVisibilityToggle: () => setState(() {
+                  _isKonfirmasiPasswordVisible = !_isKonfirmasiPasswordVisible;
+                }),
               ),
               const SizedBox(height: 24),
               
@@ -144,7 +102,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isLoading ? null : _handlePasswordChange,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.indigo,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -152,10 +110,12 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                       borderRadius: BorderRadius.circular(50.0),
                     ),
                   ),
-                  child: const Text(
-                    'Simpan',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Simpan',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                 ),
               ),
             ],
@@ -163,5 +123,117 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildPasswordTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required bool isVisible,
+    required VoidCallback onVisibilityToggle,
+    Function(String)? onChanged,
+  }) {
+    return Container(
+      width: 350,
+      child: TextField(
+        controller: controller,
+        obscureText: !isVisible,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          prefixIcon: const Icon(Icons.lock),
+          suffixIcon: IconButton(
+            icon: Icon(
+              isVisible ? Icons.visibility : Icons.visibility_off,
+              color: Colors.grey,
+            ),
+            onPressed: onVisibilityToggle,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordRequirementRow(String text, bool isValid) {
+    return Row(
+      children: [
+        Icon(
+          isValid ? Icons.check_circle : Icons.circle_outlined, 
+          color: isValid ? Colors.green : Colors.grey,
+          size: 16,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text, 
+          style: TextStyle(
+            color: isValid ? Colors.green : Colors.grey, 
+            fontSize: 12
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _handlePasswordChange() async {
+    setState(() { _isLoading = true; });
+
+    final result = await ref.read(passwordChangeProvider.notifier).changePassword(
+      oldPassword: _passwordLamaController.text, 
+      newPassword: _passwordBaruController.text, 
+      confirmPassword: _konfirmasiPasswordController.text,
+    );
+
+    setState(() { _isLoading = false; });
+
+    if (result.isSuccess) {
+      _showSuccessDialog('Kata sandi berhasil diubah');
+    } else {
+      _showErrorDialog(result.error);
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Oke'),
+            onPressed: () => Navigator.of(ctx).pop(),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Berhasil'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _passwordLamaController.dispose();
+    _passwordBaruController.dispose();
+    _konfirmasiPasswordController.dispose();
+    super.dispose();
   }
 }
