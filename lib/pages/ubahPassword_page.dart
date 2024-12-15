@@ -20,6 +20,15 @@ class _UbahPasswordPageState extends ConsumerState<UbahPasswordPage> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(passwordChangeProvider.notifier).resetValidation();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final passwordState = ref.watch(passwordChangeProvider);
 
@@ -84,7 +93,6 @@ class _UbahPasswordPageState extends ConsumerState<UbahPasswordPage> {
               _buildPasswordRequirementRow('Mengandung huruf besar', passwordState.hasUppercase),
               _buildPasswordRequirementRow('Mengandung huruf kecil', passwordState.hasLowercase),
               _buildPasswordRequirementRow('Mengandung angka', passwordState.hasDigits),
-              _buildPasswordRequirementRow('Mengandung karakter khusus', passwordState.hasSpecialChar),
               const SizedBox(height: 16),
 
               // Konfirmasi Kata Sandi Baru
@@ -202,7 +210,7 @@ class _UbahPasswordPageState extends ConsumerState<UbahPasswordPage> {
         content: Text(message),
         actions: <Widget>[
           TextButton(
-            child: const Text('Oke'),
+            child: const Text('OK'),
             onPressed: () => Navigator.of(ctx).pop(),
           )
         ],
