@@ -206,6 +206,7 @@ class _UbahPasswordPageState extends ConsumerState<UbahPasswordPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
         title: const Text('Error'),
         content: Text(message),
         actions: <Widget>[
@@ -222,6 +223,7 @@ class _UbahPasswordPageState extends ConsumerState<UbahPasswordPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
         title: const Text('Berhasil'),
         content: Text(message),
         actions: <Widget>[
