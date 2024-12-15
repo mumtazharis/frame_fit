@@ -21,6 +21,7 @@ class CameraState {
   final String? imagePath;
   final bool isFlashOn;
   final Map<String, dynamic>? predictionResult;
+  final bool isProcessing;
 
   CameraState({
     this.cameraController,
@@ -28,7 +29,8 @@ class CameraState {
     this.selectedCameraIndex = 0,
     this.imagePath,
     this.isFlashOn = false,
-    this.predictionResult
+    this.predictionResult,
+    this.isProcessing = false,
   });
 
   CameraState copyWith({
@@ -38,6 +40,7 @@ class CameraState {
     String? imagePath,
     bool? isFlashOn,
     Map<String, dynamic>? predictionResult,
+    bool? isProcessing,
   }) {
     return CameraState(
       cameraController: cameraController ?? this.cameraController,
@@ -46,6 +49,7 @@ class CameraState {
       imagePath: imagePath ?? this.imagePath,
       isFlashOn: isFlashOn ?? this.isFlashOn,
       predictionResult: predictionResult ?? this.predictionResult,
+      isProcessing: isProcessing ?? this.isProcessing,
     );
   }
 }
@@ -87,6 +91,9 @@ Future<void> takePicture(BuildContext context) async {
   }
 
   try {
+    // Aktifkan loading
+    state = state.copyWith(isProcessing: true);
+
     final image = await controller.takePicture();
 
     state = state.copyWith(imagePath: image.path, predictionResult: null);  // Reset prediction result
@@ -108,12 +115,11 @@ Future<void> takePicture(BuildContext context) async {
     await goToPreviewPage(context);
   } catch (e) {
     print('Error saat mengambil gambar: $e');
+  } finally {
+    // Nonaktifkan loading
+    state = state.copyWith(isProcessing: false);
   }
 }
-
-
-
-
 
 
   Future<void> _mirrorImage(String imagePath) async {
@@ -243,19 +249,29 @@ Future<void> selectPicture(BuildContext context) async {
   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
   if (pickedFile != null) {
-    // Jika gambar berhasil dipilih, perbarui imagePath di state
-    state = state.copyWith(imagePath: pickedFile.path);
+    try {
+      // Aktifkan loading
+      state = state.copyWith(isProcessing: true);
 
-    // Kirim gambar ke API untuk prediksi jika diperlukan
-    final prediction = await _sendImageToPredictApi(pickedFile.path);
+      // Jika gambar berhasil dipilih, perbarui imagePath di state
+      state = state.copyWith(imagePath: pickedFile.path);
 
-    if (prediction != null) {
-      // Simpan hasil prediksi dalam state
-      state = state.copyWith(predictionResult: prediction);
+      // Kirim gambar ke API untuk prediksi jika diperlukan
+      final prediction = await _sendImageToPredictApi(pickedFile.path);
+
+      if (prediction != null) {
+        // Simpan hasil prediksi dalam state
+        state = state.copyWith(predictionResult: prediction);
+      }
+
+      // Pindah ke halaman preview
+      await goToPreviewPage(context); // Memastikan context sudah tersedia
+    } catch (e) {
+      print('Error saat memilih gambar: $e');
+    } finally {
+      // Nonaktifkan loading
+      state = state.copyWith(isProcessing: false);
     }
-
-    // Pindah ke halaman preview
-    await goToPreviewPage(context); // Memastikan context sudah tersedia
   } else {
     print("Gambar tidak dipilih");
   }
