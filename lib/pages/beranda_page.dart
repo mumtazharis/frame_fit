@@ -8,6 +8,9 @@ import '../providers/search_provider.dart'; // Import provider untuk pencarian
 import '../widgets/category_tab.dart';
 import '../widgets/product_card.dart';
 import '../models/glasses_model.dart';
+import 'preview_AR.dart';
+import '../providers/AR_provider.dart';
+import '../providers/camera_provider.dart';
 
 class BerandaPage extends ConsumerStatefulWidget {
   const BerandaPage({Key? key}) : super(key: key);
@@ -132,6 +135,26 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
     );
   }
 
+  void _navigateToARPreview(List<Glasses> kacamataList) {
+    // Mendapatkan state dari cameraProvider
+    final state = ref.watch(cameraProvider); 
+    final arNotifier = ref.watch(ARProvider.notifier); // Mendapatkan notifier ARProvider
+
+    // Misalnya, menyimpan kacamata yang dicoba
+    arNotifier.kacamataCoba(kacamataList.map((glasses) => glasses.imagePath).toList());
+    // arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
+          
+    arNotifier.initializeFaceDetector();
+    // Navigasi ke halaman ARPreview
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ARPreviewPage(),
+      ),
+    );
+  }
+
+
   // Menampilkan detail produk dalam pop-up
   void _showGlassesDetailPopup(BuildContext context, Glasses glasses, WidgetRef ref) {
     ref.read(glassesDetailProvider.notifier).setGlassesDetail(glasses);
@@ -215,10 +238,14 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Tombol "Coba" dalam dialog detail produk
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.pop(context);
+                              // Mengubah cara memanggil dialog untuk mengirimkan list kacamata
+                              _navigateToARPreview([glasses]); // Jika hanya satu kacamata yang sedang ditampilkan
+                              // Atau jika Anda memiliki lebih dari satu kacamata:
+                              // _navigateToARPreview(glassesList); // Misalnya, jika glassesList adalah List<Glasses>
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
@@ -239,6 +266,9 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
                             ),
                           ),
                         ),
+
+
+
                         const SizedBox(width: 16),
                         Container(
                           decoration: BoxDecoration(

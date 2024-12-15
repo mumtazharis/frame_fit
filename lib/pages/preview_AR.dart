@@ -215,7 +215,7 @@ class ARPreviewPage extends ConsumerWidget {
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: arState.isLoading
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center()
                       : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -282,6 +282,7 @@ class ARPreviewPage extends ConsumerWidget {
                 child: IconButton(
                   icon: const Icon(Icons.close, size: 24, color: Colors.black), // Ikon silang
                   onPressed: () {
+                    arNotifier.resetState();
                     Navigator.pop(context); // Menutup halaman
                   },
                   tooltip: 'Tutup',

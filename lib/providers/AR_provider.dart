@@ -36,6 +36,20 @@ class ARState {
     this.isLoading = true,
   });
 
+  ARState reset() {
+    return ARState(
+      cameraController: null,
+      selectedCameraIndex: 0,
+      bentukWajah: null,
+      gender: null,
+      faceDetector: null,
+      faces: [], // Reset list faces
+      kacamataAssets: [], // Reset list kacamata
+      selectedGlassesIndex: 0,
+      isLoading: false, // Atur loading ke false
+    );
+  }
+
   ARState copyWith({
     CameraController? cameraController,
     int? selectedCameraIndex,
@@ -69,10 +83,17 @@ class ARNotifier extends StateNotifier<ARState> {
     
   }
 
-  void setSelectedCameraIndex(int index) {
-    state = state.copyWith(selectedCameraIndex: index);
-
+  void resetState() {
+    state = state.reset();
   }
+
+  void kacamataCoba(List<String> kacamataAssets){
+    state = state.copyWith(kacamataAssets: kacamataAssets);
+  }
+  // void setSelectedCameraIndex(int index) {
+  //   state = state.copyWith(selectedCameraIndex: index);
+
+  // }
   void updateInformasiRekomendasi(String bentukWajah, String gender) {
     print('Updating bentuk wajah to: $bentukWajah');  // Log to confirm update
     print('Updating gender to: $gender');  // Log to confirm update
@@ -109,6 +130,7 @@ class ARNotifier extends StateNotifier<ARState> {
         print("Tidak ada kamera yang tersedia.");
         return;
       }
+      state = state.copyWith(selectedCameraIndex: cameras.indexWhere((camera) => camera.lensDirection == CameraLensDirection.front));
 
       // final selectedCamera = cameras[state.selectedCameraIndex];
       final cameraController = CameraController(
@@ -204,27 +226,9 @@ class ARNotifier extends StateNotifier<ARState> {
   }
 
 
-  void stopCameraAndFaceDetection() async {
-    try {
-      print("Menghentikan face detection...");
-      await state.cameraController?.stopImageStream(); // Pastikan stream dihentikan
-      await state.faceDetector?.close(); // Tutup FaceDetector
-      state = state.copyWith(faceDetector: null);
-
-      print("Mematikan kamera...");
-      await state.cameraController?.dispose(); // Bebaskan kamera
-      state = state.copyWith(cameraController: null);
-
-      print("Kamera dan face detection berhasil dimatikan.");
-    } catch (e) {
-      print("Error saat mematikan kamera atau face detection: $e");
-    }
-  }
-
-
   @override
   void dispose() {
-    stopCameraAndFaceDetection();
+    cameraController?.dispose();
     super.dispose();
   }
 

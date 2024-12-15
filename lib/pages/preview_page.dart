@@ -45,7 +45,7 @@ class ImagePreviewPage extends ConsumerWidget {
           // Simpan gender ke dalam predictionResult
           state.predictionResult!['gender'] = selectedGender;
 
-          arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
+          // arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
           
           arNotifier.initializeFaceDetector();
    
