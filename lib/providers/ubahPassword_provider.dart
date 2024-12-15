@@ -9,13 +9,18 @@ import '../config/api_config.dart';
 class PasswordChangeNotifier extends StateNotifier<PasswordValidationState> {
   PasswordChangeNotifier() : super(const PasswordValidationState());
 
+  // Reset validasi password
+  void resetValidation() {
+    state = PasswordValidationState(); // Reset semua nilai validasi
+  }
+
+  // Validasi password
   void validatePassword(String password) {
     state = PasswordValidationState(
       hasMinLength: password.length >= 8,
       hasUppercase: password.contains(RegExp(r'[A-Z]')),
       hasLowercase: password.contains(RegExp(r'[a-z]')),
       hasDigits: password.contains(RegExp(r'\d')),
-      hasSpecialChar: password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>_]')),
     );
   }
 

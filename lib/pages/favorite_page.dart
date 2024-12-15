@@ -33,6 +33,7 @@ class FavoritePage extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final glasses = favoriteGlassesList[index];
                   return Card(
+                    color: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -82,7 +83,7 @@ class FavoritePage extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Container(
                 width: 300,
-                height: 350,
+                height: 280,
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

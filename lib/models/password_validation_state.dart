@@ -3,14 +3,12 @@ class PasswordValidationState {
   final bool hasUppercase;
   final bool hasLowercase;
   final bool hasDigits;
-  final bool hasSpecialChar;
 
   const PasswordValidationState({
     this.hasMinLength = false,
     this.hasUppercase = false,
     this.hasLowercase = false,
     this.hasDigits = false,
-    this.hasSpecialChar = false,
   });
 
   PasswordValidationState copyWith({
@@ -18,14 +16,12 @@ class PasswordValidationState {
     bool? hasUppercase,
     bool? hasLowercase,
     bool? hasDigits,
-    bool? hasSpecialChar,
   }) {
     return PasswordValidationState(
       hasMinLength: hasMinLength ?? this.hasMinLength,
       hasUppercase: hasUppercase ?? this.hasUppercase,
       hasLowercase: hasLowercase ?? this.hasLowercase,
       hasDigits: hasDigits ?? this.hasDigits,
-      hasSpecialChar: hasSpecialChar ?? this.hasSpecialChar,
     );
   }
 
@@ -33,6 +29,5 @@ class PasswordValidationState {
     hasMinLength && 
     hasUppercase && 
     hasLowercase && 
-    hasDigits && 
-    hasSpecialChar;
+    hasDigits;
 }

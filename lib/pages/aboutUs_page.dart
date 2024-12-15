@@ -6,6 +6,8 @@ class AboutUsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        shadowColor: Colors.white,
+        surfaceTintColor: Colors.white,
         title: Text('Tentang Kami'),
         backgroundColor: Colors.white,
       ),
@@ -28,8 +30,8 @@ class AboutUsPage extends StatelessWidget {
 
               // Deskripsi tentang aplikasi
               Text(
-                'FrameFit adalah aplikasi mobile inovatif yang dirancang untuk membantu Anda menemukan kacamata yang tepat dengan cara yang mudah dan menyenangkan. '
-                'Dengan teknologi deteksi wajah yang canggih, aplikasi kami menganalisis bentuk wajah Anda untuk memberikan rekomendasi frame kacamata yang paling cocok dan sesuai dengan gaya pribadi Anda.',
+                'FrameFit adalah aplikasi mobile inovatif yang dirancang untuk membantu Anda menemukan bingkai kacamata yang tepat dengan cara yang mudah dan menyenangkan. '
+                'Dengan teknologi deteksi wajah yang canggih, aplikasi kami menganalisis bentuk wajah Anda untuk memberikan rekomendasi bingkai kacamata yang paling cocok dan sesuai dengan gaya pribadi Anda.',
                 style: TextStyle(fontSize: 16, color: Colors.black54),
                 textAlign: TextAlign.justify,
               ),
@@ -47,10 +49,10 @@ class AboutUsPage extends StatelessWidget {
               SizedBox(height: 8),
 
               // Daftar fitur
-              _buildFeatureItem('Deteksi Wajah Akurat', 'FrameFit menggunakan teknologi pengenalan wajah yang akurat untuk menganalisis bentuk wajah Anda, sehingga dapat memberikan rekomendasi frame kacamata yang pas.'),
-              _buildFeatureItem('Ragam Pilihan Frame', 'Kami menyediakan berbagai pilihan frame kacamata dari berbagai model dan bahan yang dapat Anda coba melalui aplikasi ini.'),
-              _buildFeatureItem('Coba Sebelum Membeli', 'Cobalah berbagai frame secara virtual tanpa harus pergi ke toko fisik, cukup dengan menggunakan foto atau kamera depan.'),
-              _buildFeatureItem('Rekomendasi yang Tepat', 'Aplikasi kami memberikan rekomendasi frame yang sesuai berdasarkan deteksi bentuk wajah Anda, membuat proses berbelanja lebih mudah dan cepat.'),
+              _buildFeatureItem('Deteksi Wajah Akurat', 'FrameFit menggunakan teknologi pengenalan wajah yang akurat untuk menganalisis bentuk wajah Anda, sehingga dapat memberikan rekomendasi bingkai kacamata yang pas.'),
+              _buildFeatureItem('Ragam Pilihan Bingkai', 'Kami menyediakan berbagai pilihan bingkai kacamata dari berbagai model dan bahan yang dapat Anda coba melalui aplikasi ini.'),
+              _buildFeatureItem('Coba Sebelum Membeli', 'Cobalah berbagai bingkai secara virtual tanpa harus pergi ke toko fisik, cukup dengan menggunakan foto atau kamera depan.'),
+              _buildFeatureItem('Rekomendasi yang Tepat', 'Aplikasi kami memberikan rekomendasi bingkai yang sesuai berdasarkan deteksi bentuk wajah Anda, membuat proses berbelanja lebih mudah dan cepat.'),
 
               SizedBox(height: 32),
 
@@ -66,7 +68,7 @@ class AboutUsPage extends StatelessWidget {
               SizedBox(height: 8),
               Text(
                 'Misi kami adalah untuk menyederhanakan cara orang memilih kacamata dengan menggabungkan teknologi dan fashion. Kami percaya bahwa kacamata bukan hanya alat bantu penglihatan, tetapi juga bagian dari ekspresi gaya pribadi Anda. '
-                'Dengan FrameFit, kami ingin membantu setiap pengguna menemukan frame yang tidak hanya nyaman, tetapi juga menambah kepercayaan diri.',
+                'Dengan FrameFit, kami ingin membantu setiap pengguna menemukan bingkai yang tidak hanya nyaman, tetapi juga menambah kepercayaan diri.',
                 style: TextStyle(fontSize: 16, color: Colors.black54),
                 textAlign: TextAlign.justify,
               ),
@@ -84,7 +86,6 @@ class AboutUsPage extends StatelessWidget {
               SizedBox(height: 8),
               _buildFeatureItem('Personalisasi', 'Rekomendasi kami disesuaikan dengan bentuk wajah Anda, memastikan Anda mendapatkan pilihan terbaik.'),
               _buildFeatureItem('Kemudahan', 'Cobalah berbagai model kacamata langsung dari smartphone Anda, kapan saja dan di mana saja.'),
-              _buildFeatureItem('Berkualitas', 'Kami bekerja sama dengan berbagai merek kacamata ternama untuk memberikan pilihan terbaik bagi pengguna kami.'),
 
               SizedBox(height: 32),
             ],

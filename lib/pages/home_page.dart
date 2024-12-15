@@ -33,7 +33,7 @@ class HomePage extends StatelessWidget {
                   ),
                   // Teks Utama dan Deskripsi
                   Text(
-                    'Frame Fit',
+                    'FrameFit',
                     style: TextStyle(
                       fontSize: 26, // Ukuran teks lebih besar
                       fontWeight: FontWeight.bold,
@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'Menghadirkan\nkacamata terbaik,\nsesuai dengan kebutuhan pengguna, dan\nkisah inspiratif dalam gaya.',
+                    'Menghadirkan\nbingkai kacamata terbaik,\nsesuai dengan kebutuhan pengguna, dan\nkisah inspiratif dalam gaya.',
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 18, // Ukuran teks deskripsi lebih besar
