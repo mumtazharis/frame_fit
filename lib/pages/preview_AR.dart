@@ -30,7 +30,7 @@ class ARPreviewPage extends ConsumerWidget {
       body: arState.cameraController != null && arState.cameraController!.value.isInitialized
         ? GestureDetector(
         onVerticalDragUpdate: (details) {
-          if (details.delta.dy < 0) {
+          if (arState.isSwiperAndSheetEnabled && details.delta.dy < 0) {
             showModalBottomSheet(
               context: context,
               builder: (context) {
@@ -207,8 +207,9 @@ class ARPreviewPage extends ConsumerWidget {
                 color: Colors.white,
               ),
             ),
+            if (arState.isSwiperAndSheetEnabled)
             Positioned(
-            
+          
                 top: screenSize.height * 0.8 - 60,
                 left: 0,
                 right: 0,
@@ -283,6 +284,7 @@ class ARPreviewPage extends ConsumerWidget {
                   icon: const Icon(Icons.close, size: 24, color: Colors.black), // Ikon silang
                   onPressed: () {
                     arNotifier.resetState();
+                    
                     Navigator.pop(context); // Menutup halaman
                   },
                   tooltip: 'Tutup',

@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       initialRoute: isTokenValid ? '/navbar' : '/',
       routes: {
         '/': (context) => HomePage(),
-        '/camera': (context) => CameraPage(), // Kamera tanpa validasi token
+        '/camera': (context) => CameraPage(),
         '/daftar': (context) => DaftarPage(),
         '/masuk_akun': (context) => MasukAkunPage(),
         '/navbar': (context) => TokenValidationWrapper(

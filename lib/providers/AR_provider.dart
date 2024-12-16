@@ -23,6 +23,8 @@ class ARState {
   final List<String> kacamataAssets;
   final int selectedGlassesIndex;
   final bool isLoading;
+  final bool isSwiperAndSheetEnabled;
+
 
   ARState({
     this.cameraController,
@@ -34,21 +36,9 @@ class ARState {
     this.kacamataAssets = const [],
     this.selectedGlassesIndex = 0,
     this.isLoading = true,
-  });
+    this.isSwiperAndSheetEnabled = true,
 
-  ARState reset() {
-    return ARState(
-      cameraController: null,
-      selectedCameraIndex: 0,
-      bentukWajah: null,
-      gender: null,
-      faceDetector: null,
-      faces: [], // Reset list faces
-      kacamataAssets: [], // Reset list kacamata
-      selectedGlassesIndex: 0,
-      isLoading: false, // Atur loading ke false
-    );
-  }
+  });
 
   ARState copyWith({
     CameraController? cameraController,
@@ -60,6 +50,7 @@ class ARState {
     List<String>? kacamataAssets,
     int? selectedGlassesIndex,
     bool? isLoading,
+    bool? isSwiperAndSheetEnabled,
   }) {
     return ARState(
       cameraController: cameraController ?? this.cameraController,
@@ -71,20 +62,29 @@ class ARState {
       kacamataAssets: kacamataAssets ?? this.kacamataAssets,
       selectedGlassesIndex: selectedGlassesIndex ?? this.selectedGlassesIndex,
       isLoading: isLoading ?? this.isLoading,
+      isSwiperAndSheetEnabled: isSwiperAndSheetEnabled ?? this.isSwiperAndSheetEnabled,
     );
   }
 }
 
 // Notifier untuk mengelola state AR
 class ARNotifier extends StateNotifier<ARState> {
-  CameraController? cameraController;
+  // CameraController? cameraController;
   ARNotifier() : super(ARState()) {
 
     
   }
 
   void resetState() {
-    state = state.reset();
+    // Hentikan image stream jika aktif
+    state.cameraController?.stopImageStream();
+    // Dispose camera controller
+    state.cameraController?.dispose();
+    state = ARState(); // Mengembalikan semua nilai ke default
+  }
+  
+  void toggleSwiperAndSheet(bool isEnabled) {
+    state = state.copyWith(isSwiperAndSheetEnabled: isEnabled);
   }
 
   void kacamataCoba(List<String> kacamataAssets){
@@ -109,8 +109,7 @@ class ARNotifier extends StateNotifier<ARState> {
 
 
   void initializeFaceDetector() {
-    initializeCamera();
-    final faceDetector = FaceDetector(
+    final Detector = FaceDetector(
       options: FaceDetectorOptions(
         enableLandmarks: true,
         enableClassification: false,
@@ -118,7 +117,7 @@ class ARNotifier extends StateNotifier<ARState> {
         performanceMode: FaceDetectorMode.fast,
       ),
     );
-    state = state.copyWith(faceDetector: faceDetector);
+    state = state.copyWith(faceDetector: Detector);
     
   }
 
@@ -228,7 +227,7 @@ class ARNotifier extends StateNotifier<ARState> {
 
   @override
   void dispose() {
-    cameraController?.dispose();
+    state.cameraController?.dispose();
     super.dispose();
   }
 

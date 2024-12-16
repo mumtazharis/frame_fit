@@ -143,7 +143,7 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
     // Misalnya, menyimpan kacamata yang dicoba
     arNotifier.kacamataCoba(kacamataList.map((glasses) => glasses.imagePath).toList());
     // arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
-          
+    arNotifier.toggleSwiperAndSheet(false);      
     arNotifier.initializeFaceDetector();
     // Navigasi ke halaman ARPreview
     Navigator.push(

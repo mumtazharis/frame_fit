@@ -56,12 +56,17 @@ class CameraState {
 
 class CameraNotifier extends StateNotifier<CameraState> {
   CameraNotifier() : super(CameraState()) {
-    _initializeCamera();
+
   }
 
   final ImagePicker _picker = ImagePicker();
+  void resetState() {
+    // Dispose camera controller
+    state.cameraController?.dispose();
+    // state = CameraState(); // Mengembalikan semua nilai ke default
+  }
 
-  Future<void> _initializeCamera() async {
+  Future<void> initializeCamera() async {
     final cameras = await availableCameras();
     int selectedCameraIndex = cameras.indexWhere((camera) => camera.lensDirection == CameraLensDirection.front);
 
@@ -83,9 +88,9 @@ class CameraNotifier extends StateNotifier<CameraState> {
   }
 
 Future<void> takePicture(BuildContext context) async {
-  final controller = state.cameraController;
+  // final controller = state.cameraController;
 
-  if (controller == null || !controller.value.isInitialized) {
+  if (state.cameraController == null || !state.cameraController!.value.isInitialized) {
     print('Error: Kamera belum terinisialisasi.');
     return;
   }
@@ -94,7 +99,7 @@ Future<void> takePicture(BuildContext context) async {
     // Aktifkan loading
     state = state.copyWith(isProcessing: true);
 
-    final image = await controller.takePicture();
+    final image = await state.cameraController!.takePicture();
 
     state = state.copyWith(imagePath: image.path, predictionResult: null);  // Reset prediction result
 
@@ -118,6 +123,7 @@ Future<void> takePicture(BuildContext context) async {
   } finally {
     // Nonaktifkan loading
     state = state.copyWith(isProcessing: false);
+    
   }
 }
 
@@ -141,19 +147,15 @@ Future<void> takePicture(BuildContext context) async {
       await state.cameraController?.setFlashMode(FlashMode.off);
       state = state.copyWith(isFlashOn: false);
 
-      await Navigator.push(
+  
+      Navigator.push(
   
         context,
         MaterialPageRoute(
           builder: (context) => const ImagePreviewPage(),
         ),
       );
-
-      if (state.cameras![state.selectedCameraIndex].lensDirection == CameraLensDirection.back) {
-        state = state.copyWith(selectedCameraIndex: 0);
-      } else {
-        state = state.copyWith(selectedCameraIndex: 1);
-      }
+  
     }
       
   }

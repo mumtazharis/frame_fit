@@ -46,9 +46,9 @@ class ImagePreviewPage extends ConsumerWidget {
           state.predictionResult!['gender'] = selectedGender;
 
           // arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
-          
+          arNotifier.initializeCamera();
           arNotifier.initializeFaceDetector();
-   
+          arNotifier.toggleSwiperAndSheet(true);
           arNotifier.updateInformasiRekomendasi(state.predictionResult!['predicted_label'], selectedGender);
           Navigator.push(
             context,

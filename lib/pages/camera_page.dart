@@ -23,12 +23,22 @@ class CameraPage extends ConsumerWidget {
             child: Column(
               children: [
                 // Bagian untuk menampilkan CameraPreview
-                Expanded(
+                 Expanded(
                   flex: 4,
-                  child: cameraState.cameraController == null ||
-                          !cameraState.cameraController!.value.isInitialized
-                      ? const Center(child: CircularProgressIndicator())
-                      : CameraPreviewWidget(cameraController: cameraState.cameraController!),
+                  child: Builder(
+                    builder: (context) {
+                      if (cameraState.cameraController == null ||
+                          !cameraState.cameraController!.value.isInitialized) {
+                        cameraNotifier.initializeCamera();
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      return CameraPreviewWidget(
+                        cameraController: cameraState.cameraController!,
+                      );
+                    },
+                  ),
                 ),
                 // Bagian untuk kontrol kamera
                 Expanded(
@@ -42,24 +52,6 @@ class CameraPage extends ConsumerWidget {
               ],
             ),
           ),
-          // Tombol tutup
-          // Positioned(
-          //   top: 50, // Posisi tombol silang dari atas preview
-          //   left: 16, // Jarak dari sisi kiri
-          //   child: Container(
-          //     width: 40, // Lebar yang diinginkan untuk latar belakang
-          //     height: 40, // Tinggi yang diinginkan untuk latar belakang
-          //     decoration: BoxDecoration(
-          //       color: Colors.white, // Ganti dengan warna latar belakang yang diinginkan
-          //       borderRadius: BorderRadius.circular(15), // Radius sudut untuk tampilan yang lebih halus
-          //     ),
-          //     child: IconButton(
-          //       icon: const Icon(Icons.close, size: 24, color: Colors.black), // Ikon silang
-          //       onPressed: () => Navigator.pop(context), // Fungsi untuk kembali
-          //       tooltip: 'Tutup',
-          //     ),
-          //   ),
-          // ),
 
           Positioned(
             top: 50, // Posisi tombol flash dari atas preview (sama dengan tombol silang)
