@@ -62,6 +62,7 @@ class CameraNotifier extends StateNotifier<CameraState> {
   final ImagePicker _picker = ImagePicker();
   void resetState() {
     // Dispose camera controller
+    // state = state.copyWith(cameraController: null);
     state.cameraController?.dispose();
     // state = CameraState(); // Mengembalikan semua nilai ke default
   }

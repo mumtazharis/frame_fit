@@ -12,7 +12,7 @@ class DaftarState {
   DaftarState copyWith({bool? isLoading, String? errorMessage}) {
     return DaftarState(
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }

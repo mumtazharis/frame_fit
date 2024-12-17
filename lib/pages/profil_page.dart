@@ -7,12 +7,23 @@ import 'package:frame_fit/pages/editProfil_page.dart';
 import 'package:frame_fit/providers/profil_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfilePage extends ConsumerWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Mengambil data profil dari provider
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh data profil saat halaman dimuat
+    Future.microtask(() => ref.read(profileProvider.notifier).refreshProfile());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profileState = ref.watch(profileProvider);
 
     return Scaffold(
@@ -59,7 +70,7 @@ class ProfilePage extends ConsumerWidget {
                             MaterialPageRoute(builder: (context) => const EditProfilePage()),
                           );
                           if (result == true) {
-                            ref.refresh(profileProvider); // Refresh data profil
+                            ref.read(profileProvider.notifier).refreshProfile();
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -164,7 +175,7 @@ class ProfilePage extends ConsumerWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  ref.refresh(profileProvider); // Refresh data jika ada error
+                  ref.read(profileProvider.notifier).refreshProfile();
                 },
                 child: const Text('Coba Lagi'),
               ),

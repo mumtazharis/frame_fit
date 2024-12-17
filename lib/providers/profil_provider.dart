@@ -10,31 +10,56 @@ class ProfileState {
   final String? error;
 
   ProfileState({this.profile, this.error});
+
+  ProfileState copyWith({Map<String, dynamic>? profile, String? error}) {
+    return ProfileState(
+      profile: profile ?? this.profile,
+      error: error ?? this.error,
+    );
+  }
 }
 
-// Provider untuk mengambil profil
-final profileProvider = FutureProvider<ProfileState>((ref) async {
-  final token = await _getToken();
-  if (token == null) {
-    return ProfileState(error: 'Token tidak ditemukan');
+// Notifier untuk Profile
+class ProfileNotifier extends AsyncNotifier<ProfileState> {
+  @override
+  Future<ProfileState> build() async {
+    return await _fetchProfile();
   }
 
-  try {
-    final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}/api/profile'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return ProfileState(profile: data);
-    } else {
-      return ProfileState(error: 'Gagal memuat data: ${response.statusCode}');
+  // Memuat profil dari API
+  Future<ProfileState> _fetchProfile() async {
+    final token = await _getToken();
+    if (token == null) {
+      return ProfileState(error: 'Token tidak ditemukan');
     }
-  } catch (e) {
-    return ProfileState(error: 'Error: $e');
+
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/api/profile'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return ProfileState(profile: data);
+      } else {
+        return ProfileState(error: 'Gagal memuat data: ${response.statusCode}');
+      }
+    } catch (e) {
+      return ProfileState(error: 'Error: $e');
+    }
   }
-});
+
+  // Memperbarui profil secara manual
+  Future<void> refreshProfile() async {
+    state = const AsyncValue.loading();
+    state = AsyncValue.data(await _fetchProfile());
+  }
+}
+
+// Provider untuk Profile
+final profileProvider =
+    AsyncNotifierProvider<ProfileNotifier, ProfileState>(() => ProfileNotifier());
 
 // Fungsi untuk mendapatkan token
 Future<String?> _getToken() async {

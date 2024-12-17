@@ -25,8 +25,16 @@ class ARPreviewPage extends ConsumerWidget {
     }
 
     SwiperController _swiperController = SwiperController();
-
-    return Scaffold(
+    return PopScope(
+      canPop: false, // Mencegah pop default
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          // Trigger aksi tombol tutup
+          arNotifier.resetState();
+          Navigator.pop(context); // Menutup halaman
+        }
+      },
+    child: Scaffold(
       body: arState.cameraController != null && arState.cameraController!.value.isInitialized
         ? GestureDetector(
         onVerticalDragUpdate: (details) {
@@ -294,6 +302,7 @@ class ARPreviewPage extends ConsumerWidget {
           ],
         ),
       ) : Center(child: CircularProgressIndicator()),
+    )
     );
   }
 }

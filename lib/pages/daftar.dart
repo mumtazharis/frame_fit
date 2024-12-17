@@ -148,6 +148,7 @@ class _DaftarPageState extends ConsumerState<DaftarPage> {
                                   onPressed: (_isCheckboxChecked && _errorText == null)
                                       ? () async {
                                           await authNotifier.sendOtp(_emailController.text);
+                                          print(authState.errorMessage);
                                           if (authState.errorMessage == null) {
                                             Navigator.push(
                                               context,
