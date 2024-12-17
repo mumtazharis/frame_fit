@@ -4,6 +4,7 @@ import 'daftar_berhasil.dart';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class DaftarVerifikasi extends StatefulWidget {
   final String email;
@@ -37,7 +38,14 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
     _startResendTimer();
   }
 
-
+  // Tambahkan method hash password
+  String _hashPassword(String password) {
+    // Gunakan SHA-256 untuk hash password
+    var bytes = utf8.encode(password);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+  
   Future<void> _registerUser() async {
     setState(() {
       _isLoading = true;  // Menampilkan indikator loading saat request sedang berlangsung
@@ -49,11 +57,13 @@ class _VerificationPageState extends State<DaftarVerifikasi> {
     final String password = _passwordController.text;
     final String firstName = _firstNameController.text;
     final String lastName = _lastNameController.text;
+    // Hash password sebelum dikirim
+    final String hashedPassword = _hashPassword(password);
 
     final Map<String, dynamic> data = {
       'email': email,
       'otp': otp,
-      'password': password,
+      'password': hashedPassword,
       'first_name': firstName,
       'last_name': lastName,
     };

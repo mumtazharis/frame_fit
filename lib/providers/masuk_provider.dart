@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import 'package:crypto/crypto.dart';
 
 class MasukState {
   final String? accessToken;
@@ -15,12 +16,23 @@ class MasukState {
 class MasukNotifier extends StateNotifier<MasukState> {
   MasukNotifier() : super(MasukState());
 
+  // Metode hash password yang konsisten
+  String _hashPassword(String password) {
+    // Gunakan SHA-256 untuk hash password
+    var bytes = utf8.encode(password);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   Future<void> login(String email, String password) async {
     // Validasi input
     if (email.isEmpty || password.isEmpty) {
       state = MasukState(errorMessage: 'Email dan password tidak boleh kosong.');
       return;
     }
+
+    // Hash password sebelum pengiriman
+    final hashedPassword = _hashPassword(password);
 
     try {
       final response = await http.post(
@@ -30,7 +42,7 @@ class MasukNotifier extends StateNotifier<MasukState> {
         },
         body: json.encode({
           'username': email,
-          'password': password,
+          'password': hashedPassword, // Send hashed password
         }),
       );
 
