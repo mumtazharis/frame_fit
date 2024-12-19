@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frame_fit/pages/loading_screen.dart';
+import 'package:frame_fit/pages/lupa_password.dart'; // Tambahkan import untuk Lupa Password
 import 'package:frame_fit/providers/masuk_provider.dart'; // Import provider
 import 'navbar.dart';
 
@@ -108,9 +109,12 @@ class _MasukAkunPageState extends ConsumerState<MasukAkunPage> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {
-                                // Aksi lupa password
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Fitur Lupa Kata Sandi belum tersedia.')),
+                                // Navigasi ke halaman lupa password
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LupaPasswordPage(),
+                                  ),
                                 );
                               },
                               child: Text(

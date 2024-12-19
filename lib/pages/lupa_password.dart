@@ -1,82 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../config/api_config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/lupaPassword_provider.dart';
+import 'masuk_akun.dart';
 
-class LupaPasswordPage extends StatefulWidget {
+class LupaPasswordPage extends ConsumerStatefulWidget {
   @override
   _LupaPasswordPageState createState() => _LupaPasswordPageState();
 }
 
-class _LupaPasswordPageState extends State<LupaPasswordPage> {
+class _LupaPasswordPageState extends ConsumerState<LupaPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   String? _errorText;
   String? _message;
   bool _isOtpSent = false;
+  bool _isLoading = false;
 
-  // Fungsi untuk mengirim permintaan OTP ke email
   Future<void> _sendOtpRequest() async {
     final email = _emailController.text;
 
-    if (email.isEmpty) {
-      setState(() {
-        _errorText = 'Email diperlukan';
-      });
-      return;
-    }
+    setState(() {
+      _isLoading = true;
+      _errorText = null;
+      _message = null;
+    });
 
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/api/users/send_otp_email'),  // Endpoint untuk mengirim OTP lupa password
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': email}),
-    );
+    final provider = ref.read(lupaPasswordProvider);
+    final result = await provider.sendOtp(email);
 
-    if (response.statusCode == 200) {
-      setState(() {
-        _message = 'OTP telah dikirim ke email Anda.';
-        _isOtpSent = true;
-      });
-    } else {
-      final responseData = json.decode(response.body);
-      setState(() {
-        _message = responseData['message'] ?? 'Terjadi kesalahan atau email tidak ditemukan';
-      });
-    }
+    setState(() {
+      _message = result;
+      _isOtpSent = result == 'OTP telah dikirim ke email Anda.';
+      _isLoading = false;
+    });
   }
 
-  // Fungsi untuk mereset password menggunakan OTP
   Future<void> _resetPassword() async {
     final email = _emailController.text;
     final otp = _otpController.text;
     final newPassword = _newPasswordController.text;
 
-    if (otp.isEmpty || newPassword.isEmpty) {
-      setState(() {
-        _errorText = 'OTP dan password baru diperlukan';
-      });
-      return;
-    }
+    setState(() {
+      _isLoading = true;
+      _errorText = null;
+      _message = null;
+    });
 
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/api/users/reset_password'),  // Endpoint untuk mereset password
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'email': email,
-        'otp': otp,
-        'new_password': newPassword,
-      }),
-    );
+    final provider = ref.read(lupaPasswordProvider);
+    final result = await provider.resetPassword(email, otp, newPassword);
 
-    if (response.statusCode == 200) {
-      setState(() {
-        _message = 'Password berhasil diperbarui';
-      });
-    } else {
-      final responseData = json.decode(response.body);
-      setState(() {
-        _message = responseData['message'] ?? 'OTP salah atau kadaluarsa';
+    setState(() {
+      _message = result;
+      _isLoading = false;
+    });
+
+    if (result == 'Password berhasil diperbarui') {
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MasukAkunPage()),
+        );
       });
     }
   }
@@ -85,8 +69,8 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: Text('Lupa Password', style: TextStyle(fontSize: 18, color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 33, 72, 243),
+        title: Text('Lupa Kata Sandi', style: TextStyle(fontSize: 18, color: Colors.white)),
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
       ),
@@ -102,7 +86,6 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                   Image.asset('assets/images/logo_pt.png', width: 175, height: 175),
                   SizedBox(height: 40),
 
-                  // Input email untuk meminta OTP
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -111,112 +94,94 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                       labelText: 'Masukkan email Anda',
                       labelStyle: TextStyle(color: Colors.black54),
                       errorText: _errorText,
-                      errorStyle: TextStyle(color: Colors.red, fontSize: 14),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue),
+                        borderSide: BorderSide(color: const Color.fromARGB(255, 33, 72, 243)),
                       ),
-                      prefixIcon: Icon(Icons.email, color: Colors.blue),
+                      prefixIcon: Icon(Icons.email, color: const Color.fromARGB(255, 33, 72, 243)),
                     ),
                   ),
                   SizedBox(height: 20),
 
-                  // Tombol untuk mengirim OTP
                   ElevatedButton(
-                    onPressed: _sendOtpRequest,
+                    onPressed: _isLoading ? null : _sendOtpRequest,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: const Color.fromARGB(255, 33, 72, 243),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                       padding: EdgeInsets.symmetric(vertical: 16),
                       minimumSize: Size(double.infinity, 50),
                     ),
-                    child: Text(
-                      'Kirim OTP',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
+                    child: _isLoading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Kirim OTP',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
                   ),
                   SizedBox(height: 20),
 
-                  // Tampilkan pesan jika OTP sudah dikirim
                   if (_isOtpSent) ...[
-                    Text('OTP telah dikirim ke email Anda', style: TextStyle(color: Colors.green)),
-                    SizedBox(height: 20),
-                    
-                    // Input OTP
                     TextField(
                       controller: _otpController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.text,
                       decoration: InputDecoration(
                         labelText: 'Masukkan OTP',
                         labelStyle: TextStyle(color: Colors.black54),
-                        errorStyle: TextStyle(color: Colors.red, fontSize: 14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.blue),
+                          borderSide: BorderSide(color: const Color.fromARGB(255, 33, 72, 243)),
                         ),
-                        prefixIcon: Icon(Icons.lock, color: Colors.blue),
+                        prefixIcon: Icon(Icons.lock, color: const Color.fromARGB(255, 33, 72, 243)),
                       ),
                     ),
                     SizedBox(height: 20),
 
-                    // Input password baru
                     TextField(
                       controller: _newPasswordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: 'Masukkan password baru',
+                        labelText: 'Masukkan kata sandi baru',
                         labelStyle: TextStyle(color: Colors.black54),
-                        errorStyle: TextStyle(color: Colors.red, fontSize: 14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.blue),
+                          borderSide: BorderSide(color: const Color.fromARGB(255, 33, 72, 243)),
                         ),
-                        prefixIcon: Icon(Icons.lock, color: Colors.blue),
+                        prefixIcon: Icon(Icons.lock, color: const Color.fromARGB(255, 33, 72, 243)),
                       ),
                     ),
                     SizedBox(height: 20),
 
-                    // Tombol untuk mereset password
                     ElevatedButton(
-                      onPressed: _resetPassword,
+                      onPressed: _isLoading ? null : _resetPassword,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: const Color.fromARGB(255, 33, 72, 243),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
                         padding: EdgeInsets.symmetric(vertical: 16),
                         minimumSize: Size(double.infinity, 50),
                       ),
-                      child: Text(
-                        'Reset Password',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                      child: _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Reset Kata Sandi',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                    ),
+                  ],
+
+                  if (_message != null) ...[
+                    SizedBox(height: 20),
+                    Text(
+                      _message!,
+                      style: TextStyle(
+                        color: _message!.contains('berhasil') ? Colors.green : Colors.red,
+                        fontSize: 16,
                       ),
                     ),
                   ],
-
-                  // Tampilkan pesan sukses atau error
-                  if (_message != null) ...[
-                    SizedBox(height: 20),
-                    Text(_message!, style: TextStyle(color: _message!.contains('berhasil') ? Colors.green : Colors.red, fontSize: 16)),
-                  ],
-
-                  SizedBox(height: 20),
-
-                  // Tombol kembali ke login
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);  // Kembali ke halaman login
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.blue,
-                    ),
-                    child: Text(
-                      'Kembali ke Masuk',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
                 ],
               ),
             ),

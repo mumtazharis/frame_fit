@@ -74,7 +74,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.indigo,
+                          backgroundColor: const Color.fromARGB(255, 33, 72, 243),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),

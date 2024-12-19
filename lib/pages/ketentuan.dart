@@ -5,71 +5,68 @@ class KetentuanPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ketentuan Penggunaan',   style: TextStyle(
-                    color: Colors.white,),),
-        backgroundColor: Colors.blue,
+        title: Text(
+          'Ketentuan Penggunaan',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 33, 72, 243),
+        iconTheme: IconThemeData(color: Colors.white), // Mengubah warna icon back menjadi putih
       ),
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ListTile(
-                leading: Text(
-                  '1.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                title: Text(
-                  'Penggunaan aplikasi FrameFit hanya untuk membantu pengguna memilih bingkai kacamata yang sesuai berdasarkan bentuk wajah mereka.',
-                  style: TextStyle(fontSize: 16),
-                ),
+              // Poin 1
+              _buildKetentuanItem(
+                '1.',
+                'Penggunaan aplikasi FrameFit hanya untuk membantu pengguna memilih bingkai kacamata yang sesuai berdasarkan bentuk wajah mereka.',
               ),
-              ListTile(
-                leading: Text(
-                  '2.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                title: Text(
-                  'Aplikasi ini tidak menjamin bahwa bingkai yang direkomendasikan akan sepenuhnya sesuai atau memuaskan pengguna. Keputusan akhir tetap berada di pihak pengguna.',
-                  style: TextStyle(fontSize: 16),
-                ),
+              // Poin 2
+              _buildKetentuanItem(
+                '2.',
+                'Aplikasi ini tidak menjamin bahwa bingkai yang direkomendasikan akan sepenuhnya sesuai atau memuaskan pengguna. Keputusan akhir tetap berada di pihak pengguna.',
               ),
-              ListTile(
-                leading: Text(
-                  '3.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                title: Text(
-                  'Dilarang menggunakan aplikasi ini untuk tujuan komersial tanpa izin tertulis dari pengembang.',
-                  style: TextStyle(fontSize: 16),
-                ),
+              // Poin 3
+              _buildKetentuanItem(
+                '3.',
+                'Dilarang menggunakan aplikasi ini untuk tujuan komersial tanpa izin tertulis dari pengembang.',
               ),
-              ListTile(
-                leading: Text(
-                  '4.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                title: Text(
-                  'Pengguna bertanggung jawab penuh atas penggunaan aplikasi dan hasil yang diperoleh.',
-                  style: TextStyle(fontSize: 16),
-                ),
+              // Poin 4
+              _buildKetentuanItem(
+                '4.',
+                'Pengguna bertanggung jawab penuh atas penggunaan aplikasi dan hasil yang diperoleh.',
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Fungsi untuk membuat item ketentuan
+  Widget _buildKetentuanItem(String number, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            number,
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              description,
+              style: TextStyle(fontSize: 16, color: Colors.black54),
+              textAlign: TextAlign.justify,
+            ),
+          ),
+        ],
       ),
     );
   }
