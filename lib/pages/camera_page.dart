@@ -10,7 +10,7 @@ class CameraPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cameraState = ref.watch(cameraProvider);
-    final cameraNotifier = ref.read(cameraProvider.notifier);
+    final cameraNotifier = ref.watch(cameraProvider.notifier);
 
     double statusBarHeight = MediaQuery.of(context).padding.top;
 
@@ -19,7 +19,6 @@ class CameraPage extends ConsumerWidget {
       onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
           // Trigger aksi tombol tutup
-          // cameraNotifier.resetState();
           Navigator.pop(context); // Menutup halaman
         }
       },
@@ -34,8 +33,9 @@ class CameraPage extends ConsumerWidget {
                   // Bagian untuk menampilkan CameraPreview
                   Expanded(
                     flex: 4,
-                    child: Builder(
-                      builder: (context) {
+                    child: Consumer(
+                      builder: (context, ref, child) {
+                        final cameraState = ref.watch(cameraProvider);
                         if (cameraState.cameraController == null ||
                             !cameraState.cameraController!.value.isInitialized) {
                           cameraNotifier.initializeCamera();

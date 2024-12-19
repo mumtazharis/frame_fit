@@ -76,6 +76,7 @@ class ARPreviewPage extends ConsumerWidget {
                                   child: GestureDetector(
                                     onTap: () {
                                       arNotifier.updateSelectedGlassesIndex(index);
+                                      _swiperController.move(index);
                                       Navigator.pop(context);
                                     },
                                     child: Container(
@@ -224,14 +225,14 @@ class ARPreviewPage extends ConsumerWidget {
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: arState.isLoading
-                      ? Center()
+                      ? Center(child: CircularProgressIndicator())
                       : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
                               height: 120,
                               child: Swiper(
-                                controller: _swiperController, // Menggunakan controller yang sudah didefinisikan
+                                controller: _swiperController,
                                 index: arState.selectedGlassesIndex,
                                 itemCount:arState.kacamataAssets.length,
                                 itemBuilder: (BuildContext context, int index) {
@@ -262,6 +263,7 @@ class ARPreviewPage extends ConsumerWidget {
                                 loop: false,
                                 onIndexChanged: (index) {
                                   arNotifier.updateSelectedGlassesIndex(index);
+                
                                 },
 
                               ),

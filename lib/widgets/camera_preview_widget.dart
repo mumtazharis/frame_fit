@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 
 class CameraPreviewWidget extends StatelessWidget {
-  final CameraController cameraController;
+  final CameraController? cameraController;
   final bool showCircleOverlay;
 
   const CameraPreviewWidget({
     Key? key,
-    required this.cameraController,
+    this.cameraController,
     this.showCircleOverlay = true,
   }) : super(key: key);
 
@@ -26,14 +26,14 @@ class CameraPreviewWidget extends StatelessWidget {
   Widget _buildCameraPreview() {
     return Positioned.fill(
       child: AspectRatio(
-        aspectRatio: cameraController.value.aspectRatio,
-        child: cameraController.description.lensDirection == CameraLensDirection.front
+        aspectRatio: cameraController!.value.aspectRatio,
+        child: cameraController!.description.lensDirection == CameraLensDirection.front
             ? Transform(
                 alignment: Alignment.center,
                 transform: Matrix4.identity()..scale(-1.0, 1.0), // Flip horizontal
-                child: CameraPreview(cameraController),
+                child: CameraPreview(cameraController!),
               )
-            : CameraPreview(cameraController),
+            : CameraPreview(cameraController!),
       ),
     );
   }

@@ -48,7 +48,6 @@ class ImagePreviewPage extends ConsumerWidget {
           // arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);
           arNotifier.initializeCamera();
           arNotifier.initializeFaceDetector();
-          arNotifier.toggleSwiperAndSheet(true);
           arNotifier.updateInformasiRekomendasi(state.predictionResult!['predicted_label'], selectedGender);
           Navigator.push(
             context,
@@ -64,7 +63,7 @@ class ImagePreviewPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Preview Image'),
+        title: const Text('Hasil Prediksi'),
       ),
       body: Column(
         children: [
@@ -90,13 +89,13 @@ class ImagePreviewPage extends ConsumerWidget {
                   : Column(
                       children: [
                         Text(
-                          'Prediction: ${state.predictionResult!['predicted_label']}',
+                          'Bentuk wajah: ${state.predictionResult!['predicted_label']}',
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Confidence: ${state.predictionResult!['confidence']}%',
+                          'Tingkat keyakinan: ${state.predictionResult!['confidence']}%',
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],

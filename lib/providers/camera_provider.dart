@@ -56,7 +56,7 @@ class CameraState {
 
 class CameraNotifier extends StateNotifier<CameraState> {
   CameraNotifier() : super(CameraState()) {
-
+    
   }
 
   final ImagePicker _picker = ImagePicker();
@@ -64,7 +64,7 @@ class CameraNotifier extends StateNotifier<CameraState> {
     // Dispose camera controller
     // state = state.copyWith(cameraController: null);
     state.cameraController?.dispose();
-    // state = CameraState(); // Mengembalikan semua nilai ke default
+    state = CameraState(); // Mengembalikan semua nilai ke default
   }
 
   Future<void> initializeCamera() async {
@@ -148,15 +148,15 @@ Future<void> takePicture(BuildContext context) async {
       await state.cameraController?.setFlashMode(FlashMode.off);
       state = state.copyWith(isFlashOn: false);
 
-  
+   
       Navigator.push(
   
         context,
         MaterialPageRoute(
-          builder: (context) => const ImagePreviewPage(),
+          builder: (context) => ImagePreviewPage(),
         ),
       );
-  
+
     }
       
   }

@@ -56,7 +56,7 @@ class _LupaPasswordPageState extends ConsumerState<LupaPasswordPage> {
     });
 
     if (result == 'Password berhasil diperbarui') {
-      Future.delayed(Duration(seconds: 2), () {
+      Future.delayed(Duration(milliseconds: 500), () {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MasukAkunPage()),

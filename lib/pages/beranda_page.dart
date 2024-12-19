@@ -10,7 +10,6 @@ import '../widgets/product_card.dart';
 import '../models/glasses_model.dart';
 import 'preview_AR.dart';
 import '../providers/AR_provider.dart';
-import '../providers/camera_provider.dart';
 
 class BerandaPage extends ConsumerStatefulWidget {
   const BerandaPage({Key? key}) : super(key: key);
@@ -136,10 +135,10 @@ class _BerandaPageState extends ConsumerState<BerandaPage> {
   }
 
   void _navigateToARPreview(List<Glasses> kacamataList) {
-    // Mendapatkan state dari cameraProvider
-    final state = ref.watch(cameraProvider); 
+    // Mendapatkan state dari cameraProvider 
     final arNotifier = ref.watch(ARProvider.notifier); // Mendapatkan notifier ARProvider
 
+    arNotifier.initializeCamera();
     // Misalnya, menyimpan kacamata yang dicoba
     arNotifier.kacamataCoba(kacamataList.map((glasses) => glasses.imagePath).toList());
     // arNotifier.setSelectedCameraIndex(state.selectedCameraIndex);

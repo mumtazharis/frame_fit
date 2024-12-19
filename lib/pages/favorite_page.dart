@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/favorite_provider.dart';
 import '../models/glasses_model.dart';
+import 'preview_AR.dart';
+import '../providers/AR_provider.dart';
 
 class FavoritePage extends ConsumerWidget {
   @override
@@ -67,6 +69,24 @@ class FavoritePage extends ConsumerWidget {
                 },
               ),
             ),
+    );
+  }
+  void _navigateToARPreview(BuildContext context, WidgetRef ref, List<Glasses> kacamataList) {
+    // Mendapatkan state dari ARProvider
+    final arNotifier = ref.watch(ARProvider.notifier); // Mendapatkan notifier ARProvider
+
+    arNotifier.initializeCamera();
+    // Misalnya, menyimpan kacamata yang dicoba
+    arNotifier.kacamataCoba(kacamataList.map((glasses) => glasses.imagePath).toList());
+    arNotifier.toggleSwiperAndSheet(false);      
+    arNotifier.initializeFaceDetector();
+
+    // Navigasi ke halaman ARPreview
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ARPreviewPage(),
+      ),
     );
   }
 
@@ -153,7 +173,7 @@ class FavoritePage extends ConsumerWidget {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.pop(context);
+                              _navigateToARPreview(context, ref, [glasses]); 
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
@@ -201,4 +221,5 @@ class FavoritePage extends ConsumerWidget {
       },
     );
   }
+
 }
