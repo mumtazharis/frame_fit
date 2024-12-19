@@ -5,7 +5,6 @@ import 'package:frame_fit/widgets/camera_preview_widget.dart';
 import 'package:frame_fit/widgets/camera_control_widget.dart';
 
 class CameraPage extends ConsumerWidget {
-  const CameraPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,17 +13,18 @@ class CameraPage extends ConsumerWidget {
 
     double statusBarHeight = MediaQuery.of(context).padding.top;
 
-    return PopScope(
-      canPop: false, // Mencegah pop default
-      onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop) {
-          // Trigger aksi tombol tutup
-          Navigator.pop(context); // Menutup halaman
-        }
-      },
-      child: Scaffold(
+    if (cameraState.cameraController == null ||
+        !cameraState.cameraController!.value.isInitialized) {
+        cameraNotifier.initializeCamera();
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+                        }
+
+    return Scaffold(
         backgroundColor: Colors.white,
-        body: Stack(
+        body: cameraState.cameraController != null && cameraState.cameraController!.value.isInitialized
+        ? Stack(
           children: [
             Padding(
               padding: EdgeInsets.only(top: statusBarHeight),
@@ -33,21 +33,9 @@ class CameraPage extends ConsumerWidget {
                   // Bagian untuk menampilkan CameraPreview
                   Expanded(
                     flex: 4,
-                    child: Consumer(
-                      builder: (context, ref, child) {
-                        final cameraState = ref.watch(cameraProvider);
-                        if (cameraState.cameraController == null ||
-                            !cameraState.cameraController!.value.isInitialized) {
-                          cameraNotifier.initializeCamera();
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        return CameraPreviewWidget(
-                          cameraController: cameraState.cameraController!,
-                        );
-                      },
-                    ),
+                    child: CameraPreviewWidget(
+                            cameraController: cameraState.cameraController!,
+                        ),
                   ),
                   // Bagian untuk kontrol kamera
                   Expanded(
@@ -101,8 +89,9 @@ class CameraPage extends ConsumerWidget {
                 ),
               ),
           ],
-        ),
-      )
-    );
+        )
+        : Center(child: CircularProgressIndicator()),
+      );
+    
   }
 }

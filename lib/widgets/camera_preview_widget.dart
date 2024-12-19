@@ -24,6 +24,10 @@ class CameraPreviewWidget extends StatelessWidget {
   }
 
   Widget _buildCameraPreview() {
+    if (cameraController == null || !cameraController!.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Positioned.fill(
       child: AspectRatio(
         aspectRatio: cameraController!.value.aspectRatio,
