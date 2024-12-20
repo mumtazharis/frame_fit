@@ -8,7 +8,6 @@
 - Triyana Dewi Fatmawati (2241720206) - Front End Dev
 ---
 **Kontribusi pada mobile**
-Kontribusi mobile:
 1. Ahmad Mumtaz Haris
     - Halaman kamera dan AR
 2. Nanda Putra Khamdani
